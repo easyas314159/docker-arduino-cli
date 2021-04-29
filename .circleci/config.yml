@@ -5,8 +5,8 @@ executors:
     docker:
       - image: circleci/python:3.9
         auth:
-          username: $DOCKER_HUB_USERNAME
-          password: $DOCKER_HUB_PASSWORD
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
 
 jobs:
   containers:
