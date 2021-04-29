@@ -1,0 +1,24 @@
+version: 2.1
+
+executors:
+  python:
+    docker:
+      - image: circleci/python:3.9
+        auth:
+          username: $DOCKER_HUB_USERNAME
+          password: $DOCKER_HUB_PASSWORD
+
+jobs:
+  containers:
+    executor: python
+
+    steps:
+      - checkout
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - container:
+          context:
+            - dockerhub
