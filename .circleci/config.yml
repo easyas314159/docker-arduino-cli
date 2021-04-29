@@ -15,6 +15,17 @@ jobs:
     steps:
       - checkout
 
+      - setup_remote_docker
+      - run:
+          name: Docker Hub login
+          command: |
+            if [ -n "$DOCKERHUB_USERNAME" ]; then
+              docker login --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD
+            else
+              echo "Missing Docker Hub credentials"
+              exit 1
+            fi
+
 workflows:
   version: 2
   commit:
