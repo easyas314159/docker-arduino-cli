@@ -1,3 +1,4 @@
+ARG MAINTAINER_EMAIL
 ARG ARDUINO_CLI_VERSION
 ARG BASE_IMAGE
 ARG ARDUINO_CORE_URL
@@ -15,7 +16,8 @@ WORKDIR /arduino-cli
 RUN task build && task test-unit
 
 FROM $BASE_IMAGE AS arduino_cli
-LABEL maintainer="support@solarbotics.com"
+ARG MAINTAINER_EMAIL
+LABEL maintainer=$MAINTAINER_EMAIL
 COPY --from=build /arduino-cli/arduino-cli /usr/local/bin
 RUN arduino-cli config init
 
