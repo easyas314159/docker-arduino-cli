@@ -5,8 +5,8 @@ executors:
     docker:
       - image: circleci/python:3.9
         auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
+          username: $DOCKER_HUB_USERNAME
+          password: $DOCKER_HUB_PASSWORD
 
 jobs:
   containers:
@@ -25,8 +25,8 @@ jobs:
       - run:
           name: Docker Hub login
           command: |
-            if [ -n "$DOCKERHUB_USERNAME" ]; then
-              docker login --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD
+            if [ -n "$DOCKER_HUB_USERNAME" ]; then
+              docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
             else
               echo "Missing Docker Hub credentials"
               exit 1
@@ -48,7 +48,7 @@ jobs:
       - run:
           name: Build images
           command: |
-            python3 build.py --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD -m << parameters.maintainer >> -r << parameters.repo >> matrix.json
+            python3 build.py --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD -m << parameters.maintainer >> -r << parameters.repo >> matrix.json
 
 workflows:
   version: 2
