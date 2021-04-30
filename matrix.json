@@ -33,6 +33,7 @@
 			"package": "arduino",
 			"arch": "samd",
 			"versions": [
+				"1.6.21",
 				"1.8.11"
 			]
 		},
