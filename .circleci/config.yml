@@ -48,7 +48,7 @@ workflows:
   commit:
     jobs:
       - containers:
-          repo: solarbotics/arduio-cli
+          repo: solarbotics/arduino-cli
           maintainer: support@solarbotics.com
           context:
             - dockerhub
