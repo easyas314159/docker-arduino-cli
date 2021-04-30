@@ -25,6 +25,7 @@
 			"package": "arduino",
 			"arch": "avr",
 			"versions": [
+				"1.6.23",
 				"1.8.3"
 			]
 		},
