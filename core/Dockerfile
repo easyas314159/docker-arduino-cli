@@ -6,9 +6,11 @@ ARG ARDUINO_CORE
 FROM $BASE_IMAGE
 ARG MAINTAINER_EMAIL
 ARG BASE_IMAGE
-ARG ARDUINO_CORE_URL
+ARG ARDUINO_ADDITIONAL_URLS
 ARG ARDUINO_CORE
 
 LABEL maintainer=$MAINTAINER_EMAIL
-RUN echo $ARDUINO_ADDITIONAL_URLS | while read ln; arduino-cli config add board_manager.additional_urls $ln; done
-RUN arduino-cli core install $ARDUINO_CORE
+RUN if [ -n "$ARDUINO_ADDITIONAL_URLS" ] ; then \
+		arduino-cli config add board_manager.additional_urls $ARDUINO_ADDITIONAL_URLS ; \
+	fi \
+	&& arduino-cli core install $ARDUINO_CORE

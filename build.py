@@ -79,7 +79,7 @@ def main():
 				dict,
 				MAINTAINER_EMAIL=maintainer,
 				BASE_IMAGE=base_builder,
-				ARDUINO_ADDITIONAL_URLS=pf.func_op('\n'.join, core_additional_urls),
+				ARDUINO_ADDITIONAL_URLS=pf.func_op(' '.join, core_additional_urls),
 				ARDUINO_CORE=pf.func_op(fqt, core_package, core_arch)
 			)
 			core_tags = pf.func_op(broadcast_tags, base_tags, core_tags)
