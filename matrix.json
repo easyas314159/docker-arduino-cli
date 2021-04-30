@@ -32,7 +32,9 @@
 		"arduinosamd": {
 			"package": "arduino",
 			"arch": "samd",
-			"versions": []
+			"versions": [
+				"1.8.11"
+			]
 		},
 		"esp8266": {
 			"package": "esp8266",
