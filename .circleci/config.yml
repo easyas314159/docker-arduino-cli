@@ -33,18 +33,10 @@ jobs:
               exit 1
             fi
 
-      - restore_cache:
-          key: pip3-{{ .Branch }}-{{ checksum "requirements.txt" }}
-
       - run:
           name: Install dependencies
           command: |
             pip3 install -r requirements.txt
-
-      - save_cache:
-          key: pip3-{{ .Branch }}-{{ checksum "requirements.txt" }}
-          paths:
-            - "/usr/local/lib/python3.9/site-packages"
 
       - run:
           name: Build images
