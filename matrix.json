@@ -1,0 +1,40 @@
+{
+	"arduino-cli": [
+		"0.18.1"
+	],
+	"base": {
+		"python": {
+			"image": "circleci/python",
+			"versions": [
+			]
+		},
+		"node": {
+			"image": "circleci/node",
+			"versions": [
+				"14.9.0",
+				"15.14.0"
+			]
+		}
+	},
+	"core": {
+		"arduinoavr": {
+			"package": "arduino",
+			"arch": "avr",
+			"versions": []
+		},
+		"arduinosamd": {
+			"package": "arduino",
+			"arch": "samd",
+			"versions": []
+		},
+		"esp8266": {
+			"package": "esp8266",
+			"arch": "esp8266",
+			"sep": "_",
+			"additional_urls": "https://arduino.esp8266.com/stable/package_esp8266com_index.json",
+			"versions": [
+				"2.7.4"
+			]
+		}
+	}
+}
