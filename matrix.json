@@ -34,6 +34,7 @@
 				"https://arduino.esp8266.com/stable/package_esp8266com_index.json"
 			],
 			"versions": [
+				"2.6.3",
 				"2.7.4"
 			]
 		},
