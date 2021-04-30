@@ -1,8 +1,6 @@
 ARG MAINTAINER_EMAIL
 ARG ARDUINO_CLI_VERSION
 ARG BASE_IMAGE
-ARG ARDUINO_CORE_URL
-ARG ARDUINO_CORE
 
 FROM circleci/golang:1.16 AS build
 ARG ARDUINO_CLI_VERSION
@@ -15,15 +13,8 @@ RUN git clone --depth 1 --branch $ARDUINO_CLI_VERSION https://github.com/arduino
 WORKDIR /arduino-cli
 RUN task build && task test-unit
 
-FROM $BASE_IMAGE AS arduino_cli
+FROM $BASE_IMAGE
 ARG MAINTAINER_EMAIL
 LABEL maintainer=$MAINTAINER_EMAIL
 COPY --from=build /arduino-cli/arduino-cli /usr/local/bin
 RUN arduino-cli config init
-
-FROM arduino_cli AS arduino_cli_core
-ARG ARDUINO_CORE_URL
-ARG ARDUINO_CORE
-
-RUN arduino-cli config add board_manager.additional_urls $ARDUINO_CORE_URL
-RUN arduino-cli core install $ARDUINO_CORE
