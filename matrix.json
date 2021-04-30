@@ -35,6 +35,14 @@
 			"versions": [
 				"2.7.4"
 			]
+		},
+		"esp32": {
+			"package": "esp32",
+			"arch": "esp32",
+			"sep": "_",
+			"additional_urls": "https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json",
+			"versions": [
+			]
 		}
 	}
 }
