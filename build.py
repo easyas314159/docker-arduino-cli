@@ -111,8 +111,6 @@ def fqt(repo, tag):
 	return ':'.join([f for f in [repo, tag] if f])
 
 def create_docker_client(username, password):
-	logging.info('New Docker client for %s', username)
-
 	client = docker.from_env()
 	client.login(username=username, password=password, reauth=True)
 
