@@ -30,7 +30,9 @@
 		"esp8266": {
 			"package": "esp8266",
 			"arch": "esp8266",
-			"additional_urls": "https://arduino.esp8266.com/stable/package_esp8266com_index.json",
+			"additional_urls": [
+				"https://arduino.esp8266.com/stable/package_esp8266com_index.json"
+			],
 			"versions": [
 				"2.7.4"
 			]
@@ -38,7 +40,9 @@
 		"esp32": {
 			"package": "esp32",
 			"arch": "esp32",
-			"additional_urls": "https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json",
+			"additional_urls": [
+				"https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json"
+			],
 			"versions": [
 			]
 		}
