@@ -54,7 +54,7 @@ workflows:
   version: 2
   commit:
     jobs:
-      - container:
+      - containers:
           repo: solarbotics/arduio-cli
           maintainer: support@solarbotics.com
           context:
