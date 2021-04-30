@@ -12,6 +12,12 @@ jobs:
   containers:
     executor: python
 
+    parameters:
+      repo:
+        type: string
+      maintainer:
+        type: string
+
     steps:
       - checkout
 
@@ -26,10 +32,30 @@ jobs:
               exit 1
             fi
 
+      - restore_cache:
+          key: pip3-{{ .Branch }}-{{ checksum "requirments.txt" }}
+
+      - run:
+          name: Install dependencies
+          command: |
+            pip3 install -r requirments.txt
+
+      - save_cache:
+          key: pip3-{{ .Branch }}-{{ checksum "requirments.txt" }}
+          paths:
+            - "/usr/local/lib/python3.9/site-packages"
+
+      - run:
+          name: Build images
+          command: |
+            python3 build.py --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD -m << parameters.maintainer >> -r << parameters.repo >> matrix.json
+
 workflows:
   version: 2
   commit:
     jobs:
       - container:
+          repo: solarbotics/arduio-cli
+          maintainer: support@solarbotics.com
           context:
             - dockerhub
