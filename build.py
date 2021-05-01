@@ -147,13 +147,12 @@ def build_image(client, repo, buildargs, tags, dryrun=False, **kwargs):
 		logging.debug(output)
 
 	image.reload()
-	logging.info(image.tags)
+	logging.debug(image.tags)
 
 	return name
 
 def client_prune(client, dryrun=False, *args):
-	logging.info("Pruning")
-	logging.debug(args)
+	logging.debug("Pruning: %s", args)
 
 	if not dryrun:
 		client.containers.prune()
