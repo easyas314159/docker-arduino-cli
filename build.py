@@ -189,7 +189,7 @@ def arduino_cli_core_tasks(cores):
 			yield (
 				cores[base_name]['package'],
 				cores[base_name]['arch'],
-				cores[base_name]['additional_urls'],
+				cores[base_name].get('additional_urls', []),
 				core_version_tags[core_version],
 			)
 
