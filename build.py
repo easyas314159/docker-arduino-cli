@@ -82,7 +82,7 @@ def main():
 				ARDUINO_ADDITIONAL_URLS=pf.func_op(' '.join, core_additional_urls),
 				ARDUINO_CORE=pf.func_op(fqt, core_package, core_arch)
 			)
-			core_tags = pf.func_op(broadcast_tags, base_tags, core_tags)
+			core_tags = pf.func_op(broadcast_tags, core_tags, base_tags)
 
 			core_repo = pf.conditional(
 				core_package == core_arch,
