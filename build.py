@@ -151,7 +151,7 @@ def build_image(client, repo, buildargs, tags, dryrun=False, **kwargs):
 def should_build(client, tag, dryrun=False):
 	try:
 		if not dryrun:
-			rd = client.images.get_registry_data(name)
+			rd = client.images.get_registry_data(tag)
 	except docker.errors.NotFound:
 		return True
 
