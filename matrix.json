@@ -10,6 +10,7 @@
 		"python": {
 			"image": "circleci/python",
 			"versions": [
+				"3.9.4"
 			]
 		},
 		"node": {
