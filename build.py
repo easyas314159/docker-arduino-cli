@@ -183,13 +183,13 @@ def arduino_cli_tasks(arduino_cli_versions, bases, target='arduino_cli'):
 				}
 
 def arduino_cli_core_tasks(cores):
-	for base_name in cores:
-		core_version_tags = version_tags(cores[base_name]['versions'])
+	for core in cores:
+		core_version_tags = version_tags(core['versions'])
 		for core_version in core_version_tags:
 			yield (
-				cores[base_name]['package'],
-				cores[base_name]['arch'],
-				cores[base_name].get('additional_urls', []),
+				core['package'],
+				core['arch'],
+				core.get('additional_urls', []),
 				core_version_tags[core_version],
 			)
 

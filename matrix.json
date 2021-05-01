@@ -20,8 +20,8 @@
 			]
 		}
 	},
-	"core": {
-		"arduinoavr": {
+	"core": [
+		{
 			"package": "arduino",
 			"arch": "avr",
 			"versions": [
@@ -29,7 +29,7 @@
 				"1.8.3"
 			]
 		},
-		"arduinosamd": {
+		{
 			"package": "arduino",
 			"arch": "samd",
 			"versions": [
@@ -37,7 +37,7 @@
 				"1.8.11"
 			]
 		},
-		"esp8266": {
+		{
 			"package": "esp8266",
 			"arch": "esp8266",
 			"additional_urls": [
@@ -48,7 +48,7 @@
 				"2.7.4"
 			]
 		},
-		"esp32": {
+		{
 			"package": "esp32",
 			"arch": "esp32",
 			"additional_urls": [
@@ -58,5 +58,5 @@
 				"1.0.6"
 			]
 		}
-	}
+	]
 }
