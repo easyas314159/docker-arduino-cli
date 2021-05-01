@@ -119,19 +119,16 @@ def create_docker_client(username, password):
 def build_image(client, repo, buildargs, tags, dryrun=False, **kwargs):
 	name = fqt(repo, tags[0])
 
+	if not should_build(client, name, dryrun):
+		if dryrun:
+			logging.info('Building %s', name)
+		else:
+			logging.info('Skipping %s', name)
+		return name
+
 	logging.info('Building %s', name)
 	logging.debug('buildargs: %s', buildargs)
 	logging.debug('tags: %s', tags)
-
-	if dryrun:
-		return name
-
-	try:
-		rd = client.images.get_registry_data(name)
-		logging.info('Skipping %s', name)
-		return name
-	except docker.errors.NotFound:
-		pass
 
 	image, logs = client.images.build(buildargs=buildargs, **kwargs)
 	for l in logs:
@@ -150,6 +147,15 @@ def build_image(client, repo, buildargs, tags, dryrun=False, **kwargs):
 	logging.debug(image.tags)
 
 	return name
+
+def should_build(client, tag, dryrun=False):
+	try:
+		if not dryrun:
+			rd = client.images.get_registry_data(name)
+	except docker.errors.NotFound:
+		return True
+
+	return False
 
 def client_prune(client, dryrun=False, *args):
 	logging.debug("Pruning: %s", args)
