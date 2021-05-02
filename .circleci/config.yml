@@ -88,7 +88,7 @@ jobs:
         type: string
       package:
         type: string
-      arch:
+      platform:
         type: string
 
     steps:
@@ -111,7 +111,7 @@ build-jobs: &build-jobs
       name: "arduino:avr"
       index_url: << pipeline.parameters.board_manager_arduino >>
       package: arduino
-      arch: avr
+      platform: avr
       requires:
         - base
       context:
@@ -121,7 +121,7 @@ build-jobs: &build-jobs
       name: "arduino:sam"
       index_url: << pipeline.parameters.board_manager_arduino >>
       package: arduino
-      arch: sam
+      platform: sam
       requires:
         - base
       context:
@@ -131,7 +131,7 @@ build-jobs: &build-jobs
       name: "arduino:samd"
       index_url: << pipeline.parameters.board_manager_arduino >>
       package: arduino
-      arch: samd
+      platform: samd
       requires:
         - base
       context:
@@ -141,7 +141,7 @@ build-jobs: &build-jobs
       name: "esp8266:esp8266"
       index_url: << pipeline.parameters.board_manager_esp8266 >>
       package: esp8266
-      arch: esp8266
+      platform: esp8266
       requires:
         - base
       context:
@@ -151,7 +151,7 @@ build-jobs: &build-jobs
       name: "esp32:esp32"
       index_url: << pipeline.parameters.board_manager_esp32 >>
       package: esp32
-      arch: esp32
+      platform: esp32
       requires:
         - base
       context:
