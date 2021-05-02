@@ -253,11 +253,24 @@ def update(args):
 
 	message = []
 
-	# Remove stale versions
+	limit = args.limit
+
+	# Update Arduino CLI
+
+	## Remove stale versions
 	matrix['arduino-cli'], removed = remove_versions(matrix['arduino-cli'], arduino_cli_versions)
 	for v in removed:
 		message.append('Removed `arduino-cli@%s`' % v)
 
+	## Add new versions
+	matrix['arduino-cli'], added = add_versions(matrix['arduino-cli'], arduino_cli_versions, limit=limit)
+	for v in added:
+		message.append('Added `arduino-cli@%s`' % v)
+	limit -= len(added)
+
+	# Update base images
+
+	## Remove stale versions
 	for base in matrix['base']:
 		if not base['name'] in base_versions:
 			continue
@@ -266,14 +279,7 @@ def update(args):
 		for v in removed:
 			message.append('Removed base `%s@%s`' % (base['name'], v))
 
-	# Add new versions
-	limit = args.limit
-
-	matrix['arduino-cli'], added = add_versions(matrix['arduino-cli'], arduino_cli_versions, limit=limit)
-	for v in added:
-		message.append('Added `arduino-cli@%s`' % v)
-	limit -= len(added)
-
+	## Add new versions
 	for base in matrix['base']:
 		if not base['name'] in base_versions:
 			continue
