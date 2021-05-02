@@ -33,8 +33,7 @@ def get_cli_arguments():
 	parser_base = subparser_build.add_parser('base')
 	parser_base.set_defaults(command=build_base)
 
-	parser_base.add_argument('arduino_cli_versions')
-	parser_base.add_argument('base_versions')
+	parser_base.add_argument('matrix')
 
 	parser_core = subparser_build.add_parser('core')
 	parser_core.set_defaults(command=build_core)
@@ -73,12 +72,11 @@ def build_base(client, args):
 	# Get existing repo tags
 	existing_tags = get_repository_tags(args.repo)
 
-	with open(args.arduino_cli_versions, 'r') as f:
-		arduino_cli_versions = json.load(f)
-	arduino_cli_version_tags = version_tags(arduino_cli_versions)
+	with open(args.matrix, 'r') as f:
+		matrix = json.load(f)
 
-	with open(args.base_versions, 'r') as f:
-		base_versions = json.load(f)
+	arduino_cli_version_tags = version_tags(matrix['arduino-cli'])
+	base_versions = matrix['base']
 
 	output_tags = {}
 

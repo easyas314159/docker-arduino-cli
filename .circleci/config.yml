@@ -70,7 +70,7 @@ jobs:
            mkdir -p tags
            python3 docker-arduino-cli.py --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD \
             build -r << pipeline.parameters.repo >> -m << pipeline.parameters.maintainer >> \
-            base matrix/arduino-cli.json matrix/base.json > tags/base.json
+            base matrix.json > tags/base.json
 
       - store_artifacts:
           path: tags/base.json
