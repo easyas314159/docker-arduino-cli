@@ -14,9 +14,6 @@ ARDUINO_PACKAGE_URL = 'http://downloads.arduino.cc/packages/package_index.json'
 def get_cli_arguments():
 	parser = argparse.ArgumentParser()
 
-	parser.add_argument('-u', '--username', required=True)
-	parser.add_argument('-p', '--password', required=True)
-
 	parser.add_argument('--debug', default=False, action='store_true')
 	parser.add_argument('--dryrun', default=False, action='store_true')
 
@@ -24,6 +21,10 @@ def get_cli_arguments():
 	subparser.required = True
 
 	parser_build = subparser.add_parser('build')
+
+	parser_build.add_argument('-u', '--username', required=True)
+	parser_build.add_argument('-p', '--password', required=True)
+
 	parser_build.add_argument('-r', '--repo', default='solarbotics/arduino-cli')
 	parser_build.add_argument('-m', '--maintainer', default='support@solarbotics.com')
 

@@ -68,9 +68,14 @@ jobs:
          name: Build images
          command: |
            mkdir -p tags
-           python3 docker-arduino-cli.py --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD \
-            build -r << pipeline.parameters.repo >> -m << pipeline.parameters.maintainer >> \
-            base matrix.json > tags/base.json
+           python3 docker-arduino-cli.py \
+            build \
+              --username $DOCKER_HUB_USERNAME \
+              --password $DOCKER_HUB_PASSWORD \
+              -r << pipeline.parameters.repo >> \
+              -m << pipeline.parameters.maintainer >> \
+            base \
+              matrix.json > tags/base.json
 
       - store_artifacts:
           path: tags/base.json
@@ -101,8 +106,12 @@ jobs:
          name: Build images
          command: |
            mkdir -p tags
-           python3 docker-arduino-cli.py --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD \
-            build -r << pipeline.parameters.repo >> -m << pipeline.parameters.maintainer >> \
+           python3 docker-arduino-cli.py \
+            build \
+              --username $DOCKER_HUB_USERNAME \
+              --password $DOCKER_HUB_PASSWORD \
+              -r << pipeline.parameters.repo >> \
+              -m << pipeline.parameters.maintainer >> \
             core \
               --index-url << parameters.index_url >> \
               --package << parameters.package >> \
