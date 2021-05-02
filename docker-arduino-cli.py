@@ -58,10 +58,7 @@ def main():
 	logging.getLogger('py.warnings').setLevel(logging.ERROR)
 	logging.captureWarnings(True)
 
-	client = docker.from_env()
-	client.login(username=args.username, password=args.password, reauth=True)
-
-	args.command(client, args)
+	args.command(args)
 
 def get_repository_tags(repo):
 	try:
@@ -69,7 +66,7 @@ def get_repository_tags(repo):
 	except:
 		return set()
 
-def build_base(client, args):
+def build_base(args):
 	# Get existing repo tags
 	existing_tags = get_repository_tags(args.repo)
 
@@ -79,8 +76,10 @@ def build_base(client, args):
 	arduino_cli_version_tags = version_tags(matrix['arduino-cli'])
 	base_versions = matrix['base']
 
-	output_tags = {}
+	client = docker.from_env()
+	client.login(username=args.username, password=args.password, reauth=True)
 
+	output_tags = {}
 	for base_version in base_versions:
 		base_version_tags = version_tags(base_version['versions'])
 
@@ -118,7 +117,7 @@ def build_base(client, args):
 
 	json.dump(output_tags, sys.stdout)
 
-def build_core(client, args):
+def build_core(args):
 	with open(args.base_tags, 'r') as f:
 		base_version_tags = json.load(f)
 
@@ -137,6 +136,9 @@ def build_core(client, args):
 	if args.package != args.platform:
 		repo_core += '-' + args.platform
 	existing_tags = get_repository_tags(repo_core)
+
+	client = docker.from_env()
+	client.login(username=args.username, password=args.password, reauth=True)
 
 	output_tags = {}
 	for base_version_tag in base_version_tags:
