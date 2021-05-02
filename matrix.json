@@ -1,29 +1,29 @@
 {
-	"arduino-cli": [
-		"0.16.0",
-		"0.16.1",
-		"0.17.0",
-		"0.18.0",
-		"0.18.1"
-	],
-	"base": [
-		{
-			"name": "python",
-			"image": "circleci/python",
-			"versions": [
-				"3.6.13",
-				"3.7.10",
-				"3.8.9",
-				"3.9.4"
-			]
-		},
-		{
-			"name": "node",
-			"image": "circleci/node",
-			"versions": [
-				"14.9.0",
-				"15.14.0"
-			]
-		}
-	]
+  "arduino-cli": [
+    "0.16.0",
+    "0.16.1",
+    "0.17.0",
+    "0.18.0",
+    "0.18.1"
+  ],
+  "base": [
+    {
+      "name": "python",
+      "image": "circleci/python",
+      "versions": [
+        "3.6.13",
+        "3.7.10",
+        "3.8.9",
+        "3.9.4"
+      ]
+    },
+    {
+      "name": "node",
+      "image": "circleci/node",
+      "versions": [
+        "14.9.0",
+        "15.14.0"
+      ]
+    }
+  ]
 }
