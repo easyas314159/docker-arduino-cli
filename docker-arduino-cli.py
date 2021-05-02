@@ -111,8 +111,11 @@ def build_base(client, args):
 
 			build_image(client, args.repo, buildargs, tags, path='base')
 
+			client.containers.prune()
+			client.volumes.prune()
+
 		if not args.dryrun:
-			prune(client)
+			client.images.prune()
 
 	json.dump(output_tags, sys.stdout)
 
@@ -166,8 +169,11 @@ def build_core(client, args):
 
 			build_image(client, repo_core, buildargs, tags, path='core')
 
+			client.containers.prune()
+			client.volumes.prune()
+
 		if not args.dryrun:
-			prune(client)
+			client.images.prune()
 
 	json.dump(output_tags, sys.stdout)
 
@@ -216,11 +222,6 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 
 	image.reload()
 	logging.debug(image.tags)
-
-def prune(client):
-	client.containers.prune()
-	client.volumes.prune()
-	client.images.prune()
 
 if __name__ == '__main__':
 	main()
