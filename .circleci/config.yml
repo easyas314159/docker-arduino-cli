@@ -121,6 +121,23 @@ jobs:
       - store_artifacts:
           path: tags/<< parameters.package >>-<< parameters.platform >>.json
 
+  update:
+    executor: python
+
+    parameters:
+      window:
+        type: integer
+
+    steps:
+      - initialize
+
+    - run:
+       name: Update matrix
+       command: |
+         python3 docker-arduino-cli.py update --token $GITHUB_TOKEN --days << parameters.window >> matrix.json \
+          && git commit -F 'Automated matrix update' matrix.json \
+          && git push
+
 build-jobs: &build-jobs
   - base:
       context:
@@ -187,6 +204,21 @@ workflows:
     triggers:
       - schedule:
           cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+
+  update:
+    jobs:
+      - update:
+          name: update
+          window: 365
+          context:
+            - github_docker_arduino_cli
+    triggers:
+      - schedule:
+          cron: "0 12 * * *"
           filters:
             branches:
               only:
