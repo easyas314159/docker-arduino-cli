@@ -100,7 +100,17 @@ jobs:
       - run:
          name: Build images
          command: |
-           ls -lah tags
+           mkdir -p tags
+           python3 docker-arduino-cli.py --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD \
+            build -r << pipeline.parameters.repo >> -m << pipeline.parameters.maintainer >> \
+            core \
+              --index-url << parameters.index_url >> \
+              --package << parameters.package >> \
+              --platform << parameters.platform >> \
+              tags/base.json > tags/<< parameters.package >>-<< parameters.platform >>.json
+
+      - store_artifacts:
+          path: tags/<< parameters.package >>-<< parameters.platform >>.json
 
 build-jobs: &build-jobs
   - base:
