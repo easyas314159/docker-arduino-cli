@@ -198,7 +198,7 @@ workflows:
             - github_docker_arduino_cli
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: 0 */6 * * *
           filters:
             branches:
               only:
