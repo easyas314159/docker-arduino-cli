@@ -55,6 +55,7 @@ def get_cli_arguments():
 
 	parser_update.add_argument('-t', '--token', required=True)
 	parser_update.add_argument('-d', '--days', type=int, default=365)
+	parser_update.add_argument('-l', '--limit', type=int, default=1)
 
 	parser_update.add_argument('matrix')
 
@@ -245,28 +246,53 @@ def update(args):
 	after = now - timedelta(days=args.days)
 
 	arduino_cli_versions = get_version_targets(args.token, 'arduino', 'arduino-cli', after)
+	base_versions = {
+		'node': get_version_targets(args.token, 'nodejs', 'node', after),
+		'python': get_version_targets(args.token, 'python', 'cpython', after)
+	}
 
-	matrix['arduino-cli'], changed = update_versions(matrix['arduino-cli'], arduino_cli_versions)
-	if not changed:
-		base_versions = {
-			'node': get_version_targets(args.token, 'nodejs', 'node', after),
-			'python': get_version_targets(args.token, 'python', 'cpython', after)
-		}
+	message = []
 
-		for base in matrix['base']:
-			if not base['name'] in base_versions:
-				continue
+	# Remove stale versions
+	matrix['arduino-cli'], removed = remove_versions(matrix['arduino-cli'], arduino_cli_versions)
+	for v in removed:
+		message.append('Removed `arduino-cli@%s`' % v)
 
-			base['versions'], changed = update_versions(base['versions'], base_versions[base['name']])
-			if changed:
-				break
+	for base in matrix['base']:
+		if not base['name'] in base_versions:
+			continue
 
-	if not changed:
-		sys.exit(1)
+		base['versions'], removed = remove_versions(base['versions'], base_versions[base['name']])
+		for v in removed:
+			message.append('Removed base `%s@%s`' % (base['name'], v))
+
+	# Add new versions
+	limit = args.limit
+
+	matrix['arduino-cli'], added = add_versions(matrix['arduino-cli'], arduino_cli_versions, limit=limit)
+	for v in added:
+		message.append('Added `arduino-cli@%s`' % v)
+	limit -= len(added)
+
+	for base in matrix['base']:
+		if not base['name'] in base_versions:
+			continue
+
+		base['versions'], added = add_versions(base['versions'], base_versions[base['name']], limit=limit)
+		for v in added:
+			message.append('Added base `%s@%s`' % (base['name'], v))
+		limit -= len(added)
+
+	if not message:
+		return
 
 	if args.dryrun:
+		print('\n'.join(message))
 		json.dump(matrix, sys.stdout, indent=4)
 	else:
+		with open('message.txt', 'w') as f:
+			f.writelines('\n'.join(message))
+
 		with open(args.matrix, 'w') as f:
 			json.dump(matrix, f, indent=2)
 
@@ -324,19 +350,31 @@ def get_version_targets(token, owner, name, after, limit=100):
 
 	return available
 
-def update_versions(current, desired):
-	changed = False
+def version_list(iter):
+	return list(sorted(iter, key=semver.VersionInfo.parse))
 
-	updated = {v for v in current if v in desired}
-	if len(current) != len(updated):
-		changed = True
+def remove_versions(current, desired):
+	removed = set()
+	updated = set()
 
-	desired = list(sorted(desired - updated, key=semver.VersionInfo.parse))
-	if desired:
-		updated.add(desired[-1])
-		changed = True
+	for v in current:
+		if v in desired:
+			updated.add(v)
+		else:
+			removed.add(v)
 
-	return list(sorted(updated, key=semver.VersionInfo.parse)), changed
+	return version_list(updated), version_list(removed)
+
+def add_versions(current, desired, limit=1):
+	if limit <= 0:
+		return version_list(current), []
+
+	updated = set(current)
+	added = version_list(desired - updated)[-limit:]
+
+	updated.update(added)
+
+	return version_list(updated), added
 
 if __name__ == '__main__':
 	main()

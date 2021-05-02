@@ -140,9 +140,12 @@ jobs:
       - run:
          name: Update matrix
          command: |
-           python3 docker-arduino-cli.py update --token $GITHUB_TOKEN --days << parameters.window >> matrix.json \
-            && git commit -F 'Automated matrix update' matrix.json \
-            && git push
+           python3 docker-arduino-cli.py update --token $GITHUB_TOKEN --days << parameters.window >> matrix.json
+           if [ -f "message.txt" ]; then
+             git commit -F message.txt matrix.json && git push
+           else
+             echo "No matrix changes to commit"
+           fi
 
 build-jobs: &build-jobs
   - base:
