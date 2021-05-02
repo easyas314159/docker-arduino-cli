@@ -290,6 +290,34 @@ def update(args):
 			message.append('Added base `%s@%s`' % (base['name'], v))
 		limit -= len(added)
 
+	# Update cores
+
+	index_cache = {}
+
+	for core in matrix['core']:
+		index_url = core['index_url']
+		if not index_url in index_cache:
+			index_cache[index_url] = requests.get(index_url).json()['packages']
+
+		for package in index_cache[index_url]:
+			if package['name'] == core['package']:
+				break
+		else:
+			logging.warn("Failed to find package %s at %s", core['platform'], index_url)
+			continue
+
+		core_versions = {p['version'] for p in package['platforms'] if p['architecture'] == core['arch']}
+
+		## Remove stale versions
+		core['versions'], removed = remove_versions(core['versions'], core_versions)
+		for v in removed:
+			message.append('Removed core `%s:%s@%s`' % (core['package'], core['arch'], v))
+
+		## Add new versions
+		core['versions'], added = add_versions(core['versions'], core_versions, limit=None)
+		for v in added:
+			message.append('Added core `%s:%s@%s`' % (core['package'], core['arch'], v))
+
 	if not message:
 		return
 
@@ -372,12 +400,14 @@ def remove_versions(current, desired):
 
 	return version_list(updated), version_list(removed)
 
-def add_versions(current, desired, limit=1):
-	if limit <= 0:
+def add_versions(current, desired, limit=None):
+	if limit == 0:
 		return version_list(current), []
 
 	updated = set(current)
-	added = version_list(desired - updated)[-limit:]
+	added = version_list(desired - updated)
+	if not limit is None:
+		added = added[-limit:]
 
 	updated.update(added)
 
