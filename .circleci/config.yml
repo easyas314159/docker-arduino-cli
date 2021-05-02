@@ -1,10 +1,6 @@
 version: 2.1
 
 parameters:
-  workspace:
-    type: string
-    default: /tmp/workspace
-
   maintainer:
     type: string
     default: support@solarbotics.com
@@ -77,7 +73,7 @@ jobs:
             base matrix/arduino-cli.json matrix/base.json > tags/base.json
 
       - persist_to_workspace:
-          root: << pipeline.parameters.workspace >>
+          root: .
           paths:
             - tags/*
 
@@ -96,7 +92,7 @@ jobs:
       - initialize
 
       - attach_workspace:
-          at: << pipeline.parameters.workspace >>
+          at: .
 
       - run:
          name: Build images
