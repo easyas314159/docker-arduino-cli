@@ -127,9 +127,15 @@ jobs:
     parameters:
       window:
         type: integer
+      deploy_key:
+        type: string
 
     steps:
       - initialize
+
+      - add_ssh_keys:
+          fingerprints:
+            - << parameters.deploy_key >>
 
       - run:
          name: Update matrix
@@ -214,6 +220,7 @@ workflows:
       - update:
           name: update
           window: 365
+          deploy_key: "bd:50:c1:71:98:ae:e8:f4:78:f5:c0:a7:b2:0d:6d:59"
           context:
             - github_docker_arduino_cli
     triggers:
