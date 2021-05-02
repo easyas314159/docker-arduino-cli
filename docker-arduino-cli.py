@@ -91,6 +91,10 @@ def build_base(client, args):
 				# TODO: Double check other tags exist
 				continue
 
+			if args.dryrun:
+				logging.info('Building %s', tags[0])
+				continue
+
 			buildargs = {
 				'MAINTAINER_EMAIL': args.maintainer,
 				'ARDUINO_CLI_VERSION': arduino_cli_version_tag,
