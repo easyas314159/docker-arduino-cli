@@ -56,7 +56,10 @@ def main():
 	args.command(client, args)
 
 def get_repository_tags(repo):
-	return {t['name'] for t in requests.get('https://registry.hub.docker.com/v1/repositories/%s/tags' % repo).json()}
+	try:
+		return {t['name'] for t in requests.get('https://registry.hub.docker.com/v1/repositories/%s/tags' % repo).json()}
+	except:
+		return set()
 
 def build_base(client, args):
 	# Get existing repo tags
