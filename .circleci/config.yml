@@ -9,18 +9,6 @@ parameters:
     type: string
     default: solarbotics/arduino-cli
 
-  board_manager_arduino:
-    type: string
-    default: "http://downloads.arduino.cc/packages/package_index.json"
-
-  board_manager_esp8266:
-    type: string
-    default: "https://arduino.esp8266.com/stable/package_esp8266com_index.json"
-
-  board_manager_esp32:
-    type: string
-    default: "https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json"
-
 executors:
   python:
     docker:
@@ -113,10 +101,9 @@ jobs:
               -r << pipeline.parameters.repo >> \
               -m << pipeline.parameters.maintainer >> \
             core \
-              --index-url << parameters.index_url >> \
               --package << parameters.package >> \
               --platform << parameters.platform >> \
-              tags/base.json > tags/<< parameters.package >>-<< parameters.platform >>.json
+              matrix.json tags/base.json > tags/<< parameters.package >>-<< parameters.platform >>.json
 
       - store_artifacts:
           path: tags/<< parameters.package >>-<< parameters.platform >>.json
@@ -158,7 +145,6 @@ workflows:
 
       - core:
           name: "arduino:avr"
-          index_url: << pipeline.parameters.board_manager_arduino >>
           package: arduino
           platform: avr
           requires:
@@ -168,7 +154,6 @@ workflows:
 
       - core:
           name: "arduino:sam"
-          index_url: << pipeline.parameters.board_manager_arduino >>
           package: arduino
           platform: sam
           requires:
@@ -178,7 +163,6 @@ workflows:
 
       - core:
           name: "arduino:samd"
-          index_url: << pipeline.parameters.board_manager_arduino >>
           package: arduino
           platform: samd
           requires:
@@ -188,7 +172,6 @@ workflows:
 
       - core:
           name: "esp8266:esp8266"
-          index_url: << pipeline.parameters.board_manager_esp8266 >>
           package: esp8266
           platform: esp8266
           requires:
@@ -198,7 +181,6 @@ workflows:
 
       - core:
           name: "esp32:esp32"
-          index_url: << pipeline.parameters.board_manager_esp32 >>
           package: esp32
           platform: esp32
           requires:

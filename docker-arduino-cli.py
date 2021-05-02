@@ -44,10 +44,10 @@ def get_cli_arguments():
 	parser_core = subparser_build.add_parser('core')
 	parser_core.set_defaults(command=build_core)
 
-	parser_core.add_argument('--index-url', required=True)
 	parser_core.add_argument('--package', required=True)
 	parser_core.add_argument('--platform', required=True)
 
+	parser_core.add_argument('matrix')
 	parser_core.add_argument('base_tags')
 
 	parser_update = subparser.add_parser('update')
@@ -132,19 +132,20 @@ def build_base(args):
 	json.dump(output_tags, sys.stdout)
 
 def build_core(args):
+	with open(args.matrix, 'r') as f:
+		matrix = json.load(f)
+
 	with open(args.base_tags, 'r') as f:
 		base_version_tags = json.load(f)
 
-	packages = requests.get(args.index_url).json()['packages']
-
-	for package in packages:
-		if package['name'] == args.package:
+	for core in matrix['core']:
+		if core['package'] == args.package and core['arch'] == args.platform:
 			break
 	else:
 		logging.error('Unable to locate package %s', args.package)
 		sys.exit(1)
 
-	platform_version_tags = version_tags([p['version'] for p in package['platforms'] if p['architecture'] == args.platform])
+	platform_version_tags = version_tags(core['versions'])
 
 	repo_core = args.repo + '-' + args.package
 	if args.package != args.platform:
@@ -179,8 +180,8 @@ def build_core(args):
 				'ARDUINO_CORE': args.package + ':' + args.platform + '@' + platform_version_tag,
 			}
 
-			if args.index_url != ARDUINO_PACKAGE_URL:
-				buildargs['ARDUINO_ADDITIONAL_URLS'] = args.index_url
+			if core['index_url'] != ARDUINO_PACKAGE_URL:
+				buildargs['ARDUINO_ADDITIONAL_URLS'] = core['index_url']
 
 			build_image(client, repo_core, buildargs, tags, path='core')
 
