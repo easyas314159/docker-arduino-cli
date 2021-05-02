@@ -78,60 +78,73 @@ jobs:
     steps:
       - initialize
 
+build-jobs: &build-jobs
+  - base:
+      context:
+        - dockerhub
+
+  - core:
+      name: "arduino:avr"
+      index_url: << pipeline.parameters.board_manager_arduino >>
+      package: arduino
+      arch: avr
+      requires:
+        - base
+      context:
+        - dockerhub
+
+  - core:
+      name: "arduino:sam"
+      index_url: << pipeline.parameters.board_manager_arduino >>
+      package: arduino
+      arch: sam
+      requires:
+        - base
+      context:
+        - dockerhub
+
+  - core:
+      name: "arduino:samd"
+      index_url: << pipeline.parameters.board_manager_arduino >>
+      package: arduino
+      arch: samd
+      requires:
+        - base
+      context:
+        - dockerhub
+
+  - core:
+      name: "esp8266:esp8266"
+      index_url: << pipeline.parameters.board_manager_esp8266 >>
+      package: esp8266
+      arch: esp8266
+      requires:
+        - base
+      context:
+        - dockerhub
+
+  - core:
+      name: "esp32:esp32"
+      index_url: << pipeline.parameters.board_manager_esp32 >>
+      package: esp32
+      arch: esp32
+      requires:
+        - base
+      context:
+        - dockerhub
+
 workflows:
   version: 2
-  build:
-    jobs:
-      - base:
-          context:
-            - dockerhub
 
-      - core:
-          name: "arduino:avr"
-          index_url: << pipeline.parameters.board_manager_arduino >>
-          package: arduino
-          arch: avr
-          requires:
-            - base
-          context:
-            - dockerhub
+  commit:
+    jobs: *build-jobs
 
-      - core:
-          name: "arduino:sam"
-          index_url: << pipeline.parameters.board_manager_arduino >>
-          package: arduino
-          arch: sam
-          requires:
-            - base
-          context:
-            - dockerhub
-
-      - core:
-          name: "arduino:samd"
-          index_url: << pipeline.parameters.board_manager_arduino >>
-          package: arduino
-          arch: samd
-          requires:
-            - base
-          context:
-            - dockerhub
-
-      - core:
-          name: "esp8266:esp8266"
-          index_url: << pipeline.parameters.board_manager_esp8266 >>
-          package: esp8266
-          arch: esp8266
-          requires:
-            - base
-          context:
-            - dockerhub
-
-      - core:
-          name: "esp32:esp32"
-          index_url: << pipeline.parameters.board_manager_esp32 >>
-          package: esp32
-          arch: esp32
-          requires:
-            - base
-          context:
-            - dockerhub
+  nightly:
+    jobs: *build-jobs
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
