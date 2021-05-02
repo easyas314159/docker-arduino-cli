@@ -1,6 +1,6 @@
 [
 	{
-		"name": "python"
+		"name": "python",
 		"image": "circleci/python",
 		"versions": [
 			"3.8.9",
