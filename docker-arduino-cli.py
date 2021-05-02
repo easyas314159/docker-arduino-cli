@@ -9,6 +9,8 @@ import docker
 import semver
 import requests
 
+ARDUINO_PACKAGE_URL = 'http://downloads.arduino.cc/packages/package_index.json'
+
 def get_cli_arguments():
 	parser = argparse.ArgumentParser()
 
@@ -36,6 +38,12 @@ def get_cli_arguments():
 
 	parser_core = subparser_build.add_parser('core')
 	parser_core.set_defaults(command=build_core)
+
+	parser_core.add_argument('--index-url', required=True)
+	parser_core.add_argument('--package', required=True)
+	parser_core.add_argument('--platform', required=True)
+
+	parser_core.add_argument('base_tags')
 
 	return parser.parse_args()
 
@@ -101,10 +109,6 @@ def build_base(client, args):
 				'BASE_IMAGE': base_version['image'] + ':' + base_version_tag,
 			}
 
-			if args.dryrun:
-				logging.info('Building %s', tags[0])
-				continue
-
 			build_image(client, args.repo, buildargs, tags, path='base')
 
 		if not args.dryrun:
@@ -113,7 +117,59 @@ def build_base(client, args):
 	json.dump(output_tags, sys.stdout)
 
 def build_core(client, args):
-	pass
+	with open(args.base_tags, 'r') as f:
+		base_version_tags = json.load(f)
+
+	packages = requests.get(args.index_url).json()['packages']
+
+	for package in packages:
+		if package['name'] == args.package:
+			break
+	else:
+		logging.error('Unable to locate package %s', args.package)
+		sys.exit(1)
+
+	platform_version_tags = version_tags([p['version'] for p in package['platforms'] if p['architecture'] == args.platform])
+
+	repo_core = args.repo + '-' + args.package
+	if args.package != args.platform:
+		repo_core += '-' + args.platform
+	existing_tags = get_repository_tags(repo_core)
+
+	output_tags = {}
+	for base_version_tag in base_version_tags:
+		for platform_version_tag in platform_version_tags:
+			tags = broadcast_tags(
+				base_version_tags[base_version_tag],
+				platform_version_tags[platform_version_tag]
+			)
+
+			output_tags[tags[0]] = tags
+
+			if tags[0] in existing_tags:
+				logging.info('Skipping %s', tags[0])
+				# TODO: Double check other tags exist
+				continue
+
+			if args.dryrun:
+				logging.info('Building %s', tags[0])
+				continue
+
+			buildargs = {
+				'MAINTAINER_EMAIL': args.maintainer,
+				'BASE_IMAGE': args.repo + ':' + base_version_tag,
+				'ARDUINO_CORE': args.package + ':' + args.platform + '@' + platform_version_tag,
+			}
+
+			if args.index_url != ARDUINO_PACKAGE_URL:
+				buildargs['ARDUINO_ADDITIONAL_URLS'] = args.index_url
+
+			build_image(client, repo_core, buildargs, tags, path='core')
+
+		if not args.dryrun:
+			prune(client)
+
+	json.dump(output_tags, sys.stdout)
 
 def version_tags(versions):
 	tags = {}
