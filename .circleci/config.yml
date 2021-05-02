@@ -87,6 +87,7 @@ workflows:
             - dockerhub
 
       - core:
+          name: "arduino:avr"
           index_url: << pipeline.parameters.board_manager_arduino >>
           package: arduino
           arch: avr
@@ -96,6 +97,7 @@ workflows:
             - dockerhub
 
       - core:
+          name: "arduino:sam"
           index_url: << pipeline.parameters.board_manager_arduino >>
           package: arduino
           arch: sam
@@ -105,6 +107,7 @@ workflows:
             - dockerhub
 
       - core:
+          name: "arduino:samd"
           index_url: << pipeline.parameters.board_manager_arduino >>
           package: arduino
           arch: samd
@@ -114,6 +117,7 @@ workflows:
             - dockerhub
 
       - core:
+          name: "esp8266:esp8266"
           index_url: << pipeline.parameters.board_manager_esp8266 >>
           package: esp8266
           arch: esp8266
@@ -123,6 +127,7 @@ workflows:
             - dockerhub
 
       - core:
+          name: "esp32:esp32"
           index_url: << pipeline.parameters.board_manager_esp32 >>
           package: esp32
           arch: esp32
