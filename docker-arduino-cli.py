@@ -134,7 +134,7 @@ def broadcast_tags(*args):
 	return ['-'.join(t) for t in product(*args)]
 
 def build_image(client, repo, buildargs, tags, **kwargs):
-	logging.info('Building %s', name)
+	logging.info('Building %s', tags[0])
 	logging.debug('buildargs: %s', buildargs)
 	logging.debug('tags: %s', tags)
 
