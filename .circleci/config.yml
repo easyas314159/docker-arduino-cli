@@ -97,7 +97,7 @@ jobs:
       - run:
          name: Build images
          command: |
-           ls -lah << pipeline.parameters.workspace >>
+           ls -lah tags
 
 build-jobs: &build-jobs
   - base:
