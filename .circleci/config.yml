@@ -72,6 +72,9 @@ jobs:
             build -r << pipeline.parameters.repo >> -m << pipeline.parameters.maintainer >> \
             base matrix/arduino-cli.json matrix/base.json > tags/base.json
 
+      - store_artifacts:
+          path: tags/base.json
+
       - persist_to_workspace:
           root: .
           paths:
