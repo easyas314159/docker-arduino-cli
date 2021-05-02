@@ -1,5 +1,26 @@
 version: 2.1
 
+parameters:
+  maintainer:
+    type: string
+    default: support@solarbotics.com
+
+  repo:
+    type: string
+    default: solarbotics/arduino-cli
+
+  board_manager_arduino:
+    type: string
+    default: "http://downloads.arduino.cc/packages/package_index.json"
+
+  board_manager_esp8266:
+    type: string
+    default: "https://arduino.esp8266.com/stable/package_esp8266com_index.json"
+
+  board_manager_esp32:
+    type: string
+    default: "https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json"
+
 executors:
   python:
     docker:
@@ -8,21 +29,19 @@ executors:
           username: $DOCKER_HUB_USERNAME
           password: $DOCKER_HUB_PASSWORD
 
-jobs:
-  containers:
-    executor: python
-
+commands:
+  initialize:
     parameters:
-      repo:
+      version:
         type: string
-      maintainer:
-        type: string
+        default: 20.10.2
 
     steps:
       - checkout
 
       - setup_remote_docker:
-          version: 20.10.2
+          version: << parameters.version >>
+
       - run:
           name: Docker Hub login
           command: |
@@ -38,17 +57,76 @@ jobs:
           command: |
             pip3 install -r requirements.txt
 
-      - run:
-          name: Build images
-          command: |
-            python3 build.py --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD -m << parameters.maintainer >> -r << parameters.repo >> matrix.json
+jobs:
+  base:
+    executor: python
+
+    steps:
+      - initialize
+
+  core:
+    executor: python
+
+    parameters:
+      index_url:
+        type: string
+      package:
+        type: string
+      arch:
+        type: string
+
+    steps:
+      - initialize
 
 workflows:
   version: 2
-  commit:
+  build:
     jobs:
-      - containers:
-          repo: solarbotics/arduino-cli
-          maintainer: support@solarbotics.com
+      - base:
+          context:
+            - dockerhub
+
+      - core:
+          index_url: << pipeline.board_manager_arduino >>
+          package: arduino
+          arch: avr
+          requires:
+            - base
+          context:
+            - dockerhub
+
+      - core:
+          index_url: << pipeline.board_manager_arduino >>
+          package: arduino
+          arch: sam
+          requires:
+            - base
+          context:
+            - dockerhub
+
+      - core:
+          index_url: << pipeline.board_manager_arduino >>
+          package: arduino
+          arch: samd
+          requires:
+            - base
+          context:
+            - dockerhub
+
+      - core:
+          index_url: << pipeline.board_manager_esp8266 >>
+          package: esp8266
+          arch: esp8266
+          requires:
+            - base
+          context:
+            - dockerhub
+
+      - core:
+          index_url: << pipeline.board_manager_esp32 >>
+          package: esp32
+          arch: esp32
+          requires:
+            - base
           context:
             - dockerhub
