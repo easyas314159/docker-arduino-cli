@@ -1,6 +1,10 @@
 version: 2.1
 
 parameters:
+  workspace:
+    type: string
+    default: /tmp/workspace
+
   maintainer:
     type: string
     default: support@solarbotics.com
@@ -64,6 +68,19 @@ jobs:
     steps:
       - initialize
 
+      - run:
+         name: Build images
+         command: |
+           mkdir -p tags
+           python3 docker-arduino-cli.py --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD \
+            build -r << pipeline.parameters.repo >> -m << pipeline.parameters.maintainer >> \
+            base matrix/arduino-cli.json matrix/base.json > tags/base.json
+
+      - persist_to_workspace:
+          root: << pipeline.parameters.workspace >>
+          paths:
+            - tags/*
+
   core:
     executor: python
 
@@ -77,6 +94,14 @@ jobs:
 
     steps:
       - initialize
+
+      - attach_workspace:
+          at: << pipeline.parameters.workspace >>
+
+      - run:
+         name: Build images
+         command: |
+           ls -lah << pipeline.parameters.workspace >>
 
 build-jobs: &build-jobs
   - base:
