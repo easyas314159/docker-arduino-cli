@@ -98,7 +98,7 @@ def build_base(client, args):
 				logging.info('Building %s', tags[0])
 				continue
 
-			build_image(client, args.repo, buildargs, tags, base='base')
+			build_image(client, args.repo, buildargs, tags, path='base')
 
 		if not args.dryrun:
 			prune(client)
