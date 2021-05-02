@@ -69,15 +69,15 @@ def build_base(client, args):
 	with open(args.base_versions, 'r') as f:
 		base_versions = json.load(f)
 
-	for base_version in base_versions:
-		base_version['tags'] = version_tags(base_version['versions'])
-
 	output_tags = {}
-	for arduino_cli_version_tag, base_version in product(arduino_cli_version_tags, base_versions):
-		for base_version_tag in base_version['tags']:
+
+	for base_version in base_versions:
+		base_version_tags = version_tags(base_version['versions'])
+
+		for base_version_tag, arduino_cli_version_tag in product(base_version_tags, arduino_cli_version_tags):
 			tags = [(t[0], base_version['name']+t[1]) for t in product(
 				arduino_cli_version_tags[arduino_cli_version_tag],
-				base_version['tags'][base_version_tag]
+				base_version_tags[base_version_tag]
 			)]
 			tags = ['-'.join([f for f in t if f]) for t in tags]
 
@@ -99,6 +99,9 @@ def build_base(client, args):
 				continue
 
 			build_image(client, args.repo, buildargs, tags, base='base')
+
+		if not args.dryrun:
+			prune(client)
 
 	json.dump(output_tags, sys.stdout)
 
@@ -151,13 +154,10 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 	image.reload()
 	logging.debug(image.tags)
 
-def prune(client, dryrun=False):
-	if not dryrun:
-		client.containers.prune()
-		client.volumes.prune()
-		client.images.prune()
-
-	return args
+def prune(client):
+	client.containers.prune()
+	client.volumes.prune()
+	client.images.prune()
 
 if __name__ == '__main__':
 	main()
