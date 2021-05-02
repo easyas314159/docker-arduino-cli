@@ -54,6 +54,7 @@ def get_cli_arguments():
 	parser_update.set_defaults(command=update)
 
 	parser_update.add_argument('-t', '--token', required=True)
+	parser_update.add_argument('-d', '--days', type=int, default=365)
 
 	parser_update.add_argument('matrix')
 
@@ -241,7 +242,7 @@ def update(args):
 		matrix = json.load(f, object_pairs_hook=OrderedDict)
 
 	now = datetime.now(timezone.utc)
-	after = now - timedelta(days=365)
+	after = now - timedelta(days=args.days)
 
 	arduino_cli_versions = get_version_targets(args.token, 'arduino', 'arduino-cli', after)
 
