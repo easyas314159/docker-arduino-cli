@@ -77,8 +77,6 @@ jobs:
     executor: python
 
     parameters:
-      index_url:
-        type: string
       package:
         type: string
       platform:
