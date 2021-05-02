@@ -140,8 +140,8 @@ def build_core(client, args):
 	for base_version_tag in base_version_tags:
 		for platform_version_tag in platform_version_tags:
 			tags = broadcast_tags(
-				base_version_tags[base_version_tag],
-				platform_version_tags[platform_version_tag]
+				platform_version_tags[platform_version_tag],
+				base_version_tags[base_version_tag]
 			)
 
 			output_tags[tags[0]] = tags
