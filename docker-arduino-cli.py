@@ -1,14 +1,19 @@
+import re
 import sys
 import json
 import logging
 import argparse
 
 from itertools import product
+from collections import OrderedDict
+from datetime import datetime, timedelta, timezone
 
 import docker
 import semver
 import requests
+import dateutil.parser
 
+PATTERN_SEMVER = re.compile('^v?(\d+\.\d+\.\d+)$')
 ARDUINO_PACKAGE_URL = 'http://downloads.arduino.cc/packages/package_index.json'
 
 def get_cli_arguments():
@@ -44,6 +49,13 @@ def get_cli_arguments():
 	parser_core.add_argument('--platform', required=True)
 
 	parser_core.add_argument('base_tags')
+
+	parser_update = subparser.add_parser('update')
+	parser_update.set_defaults(command=update)
+
+	parser_update.add_argument('-t', '--token', required=True)
+
+	parser_update.add_argument('matrix')
 
 	return parser.parse_args()
 
@@ -223,6 +235,107 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 
 	image.reload()
 	logging.debug(image.tags)
+
+def update(args):
+	with open(args.matrix, 'r') as f:
+		matrix = json.load(f, object_pairs_hook=OrderedDict)
+
+	now = datetime.now(timezone.utc)
+	after = now - timedelta(days=365)
+
+	arduino_cli_versions = get_version_targets(args.token, 'arduino', 'arduino-cli', after)
+
+	matrix['arduino-cli'], changed = update_versions(matrix['arduino-cli'], arduino_cli_versions)
+	if not changed:
+		base_versions = {
+			'node': get_version_targets(args.token, 'nodejs', 'node', after),
+			'python': get_version_targets(args.token, 'python', 'cpython', after)
+		}
+
+		for base in matrix['base']:
+			if not base['name'] in base_versions:
+				continue
+
+			base['versions'], changed = update_versions(base['versions'], base_versions[base['name']])
+			if changed:
+				break
+
+	if not changed:
+		sys.exit(1)
+
+	if args.dryrun:
+		json.dump(matrix, sys.stdout, indent=4)
+	else:
+		with open(args.matrix, 'w') as f:
+			json.dump(matrix, f, indent=2)
+
+def get_version_targets(token, owner, name, after, limit=100):
+	headers = {'Authorization': 'bearer %s' % token}
+	query = '''{{
+		repository(name: "{name}", owner: "{owner}") {{
+			refs(refPrefix: "refs/tags/", orderBy: {{field: TAG_COMMIT_DATE, direction: DESC}}, first: {limit:d}) {{
+				nodes {{
+					name
+					target {{
+						... on Tag {{
+							target {{
+								... on Commit {{
+									authoredDate
+									committedDate
+									pushedDate
+								}}
+							}}
+						}}
+					}}
+				}}
+	        }}
+		}}
+	}}'''.format(owner=owner, name=name, limit=limit)
+
+	available = set()
+
+	results = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers).json()
+	for node in results['data']['repository']['refs']['nodes']:
+		m = PATTERN_SEMVER.match(node['name'])
+		if not m:
+			continue
+
+		try:
+			target = node['target']['target']
+			for key in ['pushedDate', 'committedDate', 'authoredDate']:
+				if not key in target:
+					continue
+
+				if not target[key]:
+					continue
+
+				pushed = dateutil.parser.parse(target[key])
+				break
+			else:
+				continue
+		except:
+			continue
+
+		if pushed < after:
+			continue
+
+		available.add(m.group(1))
+
+	return available
+
+def update_versions(current, desired):
+	changed = False
+
+	updated = {v for v in current if v in desired}
+	if len(current) != len(updated):
+		changed = True
+
+	desired = list(sorted(desired - updated, key=semver.VersionInfo.parse))
+	if desired:
+		updated.add(desired[-1])
+		changed = True
+
+	return list(sorted(updated, key=semver.VersionInfo.parse)), changed
 
 if __name__ == '__main__':
 	main()
