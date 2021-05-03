@@ -32,6 +32,6 @@ Repository: [{{image}}](https://hub.docker.com/r/{{image}})
 {{name}} Version | Version Tags
 --- | ---
 {{#tags}}
-{{key}} |{{#value}} `{{.}}`{{/value}}
+{{key}} |{{#value}} `{{name}}{{.}}`{{/value}}
 {{/tags}}
 {{/base}}
