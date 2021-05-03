@@ -262,30 +262,32 @@ def build_docs(args):
 		max_base_versions.append(base['name'] + first(base_tags[base['name']]))
 
 	for core in matrix['core']:
+		core['repo'] = args.repo + '-' + core['package']
+		if core['package'] != core['arch']:
+			core['repo'] += '-' + core['arch']
+
 		core['tags'] = version_tags(core['versions'])
-		max_core_version = first(core['tags'])
+		core['max_version'] = first(core['tags'])
 
 		core['tags'] = [{'key': k, 'value': v} for k,v in core['tags'].items()]
 
-		repo_core = args.repo + '-' + core['package']
-		if core['package'] != core['arch']:
-			repo_core += '-' + core['arch']
+	for core in matrix['core']:
+		filename = '%s-%s.md' % (core['package'], core['arch'])
 
-		with open('templates/core.md', 'r') as f:
-			doc = chevron.render(f, {
-				'repo_base': args.repo,
-				'repo_core': repo_core,
-				'max_core_version': max_core_version,
+		render_template(
+			'templates/core.md',
+			os.path.join(args.output, filename),
+			{
+				'repo': args.repo,
 				'max_base_versions': max_base_versions,
 				'max_arduino_cli_version': max_arduino_cli_version,
 				'core': core,
-			})
+			}
+		)
 
-		filename = '%s-%s.md' % (core['package'], core['arch'])
-		filepath = os.path.join(args.output, filename)
-
-		with open(filepath, 'w') as f:
-			f.write(doc)
+def render_template(src, dst, data):
+	with open(src, 'r') as f_in, open(dst, 'w') as f_out:
+		f_out.write(chevron.render(f_in, data))
 
 def update(args):
 	with open(args.matrix, 'r') as f:
