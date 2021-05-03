@@ -131,7 +131,7 @@ jobs:
               matrix.json
 
       - store_artifacts:
-          path: docs/*
+          path: docs
 
   update:
     executor: python
