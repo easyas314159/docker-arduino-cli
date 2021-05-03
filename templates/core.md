@@ -1,6 +1,6 @@
 # Arduino CLI with `{{core.package}}:{{core.arch}}` Preinstalled
 
-For more details on using these images see [{{repo_base}}](https://hub.docker.com/r/{{repo_base}})
+For more details on using these images see [{{repo}}](https://hub.docker.com/r/{{repo}})
 
 ## Tags
 

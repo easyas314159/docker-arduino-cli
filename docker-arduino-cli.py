@@ -261,6 +261,8 @@ def build_docs(args):
 		base_tags[base['name']] = version_tags(base['versions'])
 		max_base_versions.append(base['name'] + first(base_tags[base['name']]))
 
+		base['tags'] = mustache_map(base_tags[base['name']])
+
 	for core in matrix['core']:
 		core['repo'] = args.repo + '-' + core['package']
 		if core['package'] != core['arch']:
@@ -269,7 +271,20 @@ def build_docs(args):
 		core['tags'] = version_tags(core['versions'])
 		core['max_version'] = first(core['tags'])
 
-		core['tags'] = [{'key': k, 'value': v} for k,v in core['tags'].items()]
+		core['tags'] = mustache_map(core['tags'])
+
+	render_template(
+		'templates/base.md',
+		os.path.join(args.output, 'base.md'),
+		{
+			'repo': args.repo,
+			'max_base_versions': max_base_versions,
+			'max_arduino_cli_version': max_arduino_cli_version,
+			'arduino_cli_versions': mustache_map(arduino_cli_versions),
+			'base': matrix['base'],
+			'core': matrix['core'],
+		}
+	)
 
 	for core in matrix['core']:
 		filename = '%s-%s.md' % (core['package'], core['arch'])
@@ -284,6 +299,9 @@ def build_docs(args):
 				'core': core,
 			}
 		)
+
+def mustache_map(m):
+	return [{'key': k, 'value': v} for k,v in m.items()]
 
 def render_template(src, dst, data):
 	with open(src, 'r') as f_in, open(dst, 'w') as f_out:
