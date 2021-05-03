@@ -139,6 +139,8 @@ jobs:
             matrix.json
 
            if [ -f "message.txt" ]; then
+             git config --global user.email "kevin.loney@brainsinjars.com"
+             git config --global user.name "easyas314159"
              git commit -F message.txt matrix.json && git push
            else
              echo "No matrix changes to commit"
