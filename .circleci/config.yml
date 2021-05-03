@@ -19,11 +19,6 @@ executors:
 
 commands:
   init_env:
-    parameters:
-      version:
-        type: string
-        default: 20.10.2
-
     steps:
       - checkout
 
@@ -33,6 +28,11 @@ commands:
             pip3 install -r requirements.txt
 
   init_build:
+    parameters:
+      version:
+        type: string
+        default: 20.10.2
+
     steps:
       - setup_remote_docker:
           version: << parameters.version >>
