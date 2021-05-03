@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 import json
@@ -50,6 +51,13 @@ def get_cli_arguments():
 
 	parser_core.add_argument('matrix')
 	parser_core.add_argument('base_tags')
+
+
+	parser_docs = subparser_build.add_parser('docs')
+	parser_docs.set_defaults(command=build_docs)
+
+	parser_docs.add_argument('-o', '--output', required=True)
+	parser_docs.add_argument('matrix')
 
 	parser_update = subparser.add_parser('update')
 	parser_update.set_defaults(command=update)
@@ -240,6 +248,45 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 	image.reload()
 	logging.debug(image.tags)
 
+def build_docs(args):
+	with open(args.matrix, 'r') as f:
+		matrix = json.load(f)
+
+	arduino_cli_versions = version_tags(matrix['arduino-cli'])
+	max_arduino_cli_version = first(arduino_cli_versions)
+
+	base_tags = OrderedDict()
+	max_base_versions = []
+	for base in matrix['base']:
+		base_tags[base['name']] = version_tags(base['versions'])
+		max_base_versions.append(base['name'] + first(base_tags[base['name']]))
+
+	for core in matrix['core']:
+		core['tags'] = version_tags(core['versions'])
+		max_core_version = first(core['tags'])
+
+		core['tags'] = [{'key': k, 'value': v} for k,v in core['tags'].items()]
+
+		repo_core = args.repo + '-' + core['package']
+		if core['package'] != core['arch']:
+			repo_core += '-' + core['arch']
+
+		with open('templates/core.md', 'r') as f:
+			doc = chevron.render(f, {
+				'repo_base': args.repo,
+				'repo_core': repo_core,
+				'max_core_version': max_core_version,
+				'max_base_versions': max_base_versions,
+				'max_arduino_cli_version': max_arduino_cli_version,
+				'core': core,
+			})
+
+		filename = '%s-%s.md' % (core['package'], core['arch'])
+		filepath = os.path.join(args.output, filename)
+
+		with open(filepath, 'w') as f:
+			f.write(doc)
+
 def update(args):
 	with open(args.matrix, 'r') as f:
 		matrix = json.load(f, object_pairs_hook=OrderedDict)
@@ -413,6 +460,10 @@ def add_versions(current, desired, limit=None):
 	updated.update(added)
 
 	return version_list(updated), added
+
+def first(iter):
+	for i in iter:
+		return i
 
 if __name__ == '__main__':
 	main()

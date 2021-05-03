@@ -110,6 +110,35 @@ jobs:
       - store_artifacts:
           path: tags/<< parameters.package >>-<< parameters.platform >>.json
 
+  docs:
+    executor: python
+
+    parameters:
+      package:
+        type: string
+      platform:
+        type: string
+
+    steps:
+      - init_env
+
+      - run:
+         name: Build images
+         command: |
+           mkdir -p docs
+           python3 docker-arduino-cli.py \
+            build \
+              --username $DOCKER_HUB_USERNAME \
+              --password $DOCKER_HUB_PASSWORD \
+              -r << pipeline.parameters.repo >> \
+              -m << pipeline.parameters.maintainer >> \
+            docs \
+              --output docs/
+              matrix.json
+
+      - store_artifacts:
+          path: docs/*
+
   update:
     executor: python
 
@@ -214,5 +243,9 @@ workflows:
           platform: esp32
           requires:
             - base
+          context:
+            - dockerhub
+
+      - docs:
           context:
             - dockerhub
