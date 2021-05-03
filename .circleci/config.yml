@@ -113,12 +113,6 @@ jobs:
   docs:
     executor: python
 
-    parameters:
-      package:
-        type: string
-      platform:
-        type: string
-
     steps:
       - init_env
 
