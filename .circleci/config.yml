@@ -18,7 +18,7 @@ executors:
           password: $DOCKER_HUB_PASSWORD
 
 commands:
-  initialize:
+  init_env:
     parameters:
       version:
         type: string
@@ -27,6 +27,13 @@ commands:
     steps:
       - checkout
 
+      - run:
+          name: Install dependencies
+          command: |
+            pip3 install -r requirements.txt
+
+  init_build:
+    steps:
       - setup_remote_docker:
           version: << parameters.version >>
 
@@ -40,17 +47,13 @@ commands:
               exit 1
             fi
 
-      - run:
-          name: Install dependencies
-          command: |
-            pip3 install -r requirements.txt
-
 jobs:
   base:
     executor: python
 
     steps:
-      - initialize
+      - init_env
+      - init_build
 
       - run:
          name: Build images
@@ -83,7 +86,8 @@ jobs:
         type: string
 
     steps:
-      - initialize
+      - init_env
+      - init_build
 
       - attach_workspace:
           at: .
@@ -118,7 +122,7 @@ jobs:
         type: string
 
     steps:
-      - initialize
+      - init_env
 
       - add_ssh_keys:
           fingerprints:
