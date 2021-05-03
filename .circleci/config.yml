@@ -112,6 +112,8 @@ jobs:
     parameters:
       window:
         type: integer
+      limit:
+        type: integer
       deploy_key:
         type: string
 
@@ -125,7 +127,13 @@ jobs:
       - run:
          name: Update matrix
          command: |
-           python3 docker-arduino-cli.py update --token $GITHUB_TOKEN --days << parameters.window >> matrix.json
+           python3 docker-arduino-cli.py \
+            update \
+              --token $GITHUB_TOKEN \
+              --days << parameters.window >> \
+              --limit << parameters.limit >> \
+            matrix.json
+
            if [ -f "message.txt" ]; then
              git commit -F message.txt matrix.json && git push
            else
@@ -140,6 +148,7 @@ workflows:
       - update:
           name: update
           window: 365
+          limit: 1
           deploy_key: "bd:50:c1:71:98:ae:e8:f4:78:f5:c0:a7:b2:0d:6d:59"
           context:
             - github_docker_arduino_cli
