@@ -127,7 +127,7 @@ jobs:
               -r << pipeline.parameters.repo >> \
               -m << pipeline.parameters.maintainer >> \
             docs \
-              --output docs/
+              --output docs/ \
               matrix.json
 
       - store_artifacts:
