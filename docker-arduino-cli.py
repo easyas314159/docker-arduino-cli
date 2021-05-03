@@ -195,8 +195,8 @@ def build_core(args):
 
 def version_tags(versions):
 	tags = {}
-	max_versions = {}
-	for v in versions:
+	max_versions = OrderedDict()
+	for v in sorted(versions, key=semver.VersionInfo.parse, reverse=True):
 		tags[v] = [v]
 
 		parent = v
