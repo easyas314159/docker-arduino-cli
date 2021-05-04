@@ -205,24 +205,6 @@ workflows:
             - dockerhub
 
       - core:
-          name: "arduino:sam"
-          package: arduino
-          platform: sam
-          requires:
-            - base
-          context:
-            - dockerhub
-
-      - core:
-          name: "arduino:samd"
-          package: arduino
-          platform: samd
-          requires:
-            - base
-          context:
-            - dockerhub
-
-      - core:
           name: "esp8266:esp8266"
           package: esp8266
           platform: esp8266
