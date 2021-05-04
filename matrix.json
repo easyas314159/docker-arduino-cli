@@ -1,21 +1,16 @@
 {
   "arduino-cli": [
-    "0.15.1",
+    "0.14.0",
     "0.15.2",
-    "0.16.0",
     "0.16.1",
     "0.17.0",
-    "0.18.0",
     "0.18.1"
   ],
   "base": [
     {
       "name": "python",
       "image": "circleci/python",
-      "versions": [
-        "3.8.9",
-        "3.9.4"
-      ]
+      "versions": []
     },
     {
       "name": "node",
