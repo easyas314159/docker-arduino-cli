@@ -130,7 +130,11 @@ def build_base(args):
 				'BASE_IMAGE': base_version['image'] + ':' + base_version_tag,
 			}
 
-			build_image(client, args.repo, buildargs, tags, path='base')
+			try:
+				build_image(client, args.repo, buildargs, tags, path='base')
+			except Exception as ex:
+				logging.exception(ex)
+				logging.error('Building %s failed', tags[0])
 
 			client.containers.prune()
 			client.volumes.prune()
@@ -192,7 +196,11 @@ def build_core(args):
 			if core['index_url'] != ARDUINO_PACKAGE_URL:
 				buildargs['ARDUINO_ADDITIONAL_URLS'] = core['index_url']
 
-			build_image(client, repo_core, buildargs, tags, path='core')
+			try:
+				build_image(client, repo_core, buildargs, tags, path='core')
+			except Exception as ex:
+				logging.exception(ex)
+				logging.error('Building %s failed', tags[0])
 
 			client.containers.prune()
 			client.volumes.prune()
@@ -232,14 +240,10 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 	logging.debug('buildargs: %s', buildargs)
 	logging.debug('tags: %s', tags)
 
-	try:
-		image, logs = client.images.build(buildargs=buildargs, **kwargs)
-		for l in logs:
-			logging.debug(l)
-	except Exception as ex:
-		logging.exception(ex)
-		logging.error('Building %s failed', tags[0])
-		return
+
+	image, logs = client.images.build(buildargs=buildargs, **kwargs)
+	for l in logs:
+		logging.debug(l)
 
 	for tag in tags:
 		if not image.tag(repo, tag=tag):
