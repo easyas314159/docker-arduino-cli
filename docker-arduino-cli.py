@@ -90,14 +90,15 @@ def get_repository_tags(repo):
 		return set()
 
 def build_base(args):
-	# Get existing repo tags
-	existing_tags = get_repository_tags(args.repo)
-
 	with open(args.matrix, 'r') as f:
 		matrix = json.load(f)
 
 	arduino_cli_version_tags = version_tags(matrix['arduino-cli'])
 	base_versions = matrix['base']
+
+	# Get existing repo tags
+	existing_tags = get_repository_tags(args.repo)
+	existing_base_tags = {b['name']: get_repository_tags(b['image']) for b in base_versions}
 
 	client = docker.from_env()
 	client.login(username=args.username, password=args.password, reauth=True)
@@ -112,6 +113,15 @@ def build_base(args):
 				base_version_tags[base_version_tag]
 			)]
 			tags = ['-'.join([f for f in t if f]) for t in tags]
+
+			if not base_version_tag in existing_base_tags[base_version['name']]:
+				logging.info(
+					'Skipping %s due to missing base %s:%s',
+					tags[0],
+					base_version['image'],
+					base_version_tag
+				)
+				continue
 
 			output_tags[tags[0]] = tags
 
