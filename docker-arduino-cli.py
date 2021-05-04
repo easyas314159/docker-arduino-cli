@@ -147,6 +147,7 @@ def build_base(args):
 			except Exception as ex:
 				logging.exception(ex)
 				logging.error('Building %s failed', tags[0])
+				del output_tags[tags[0]]
 
 			client.containers.prune()
 			client.volumes.prune()
@@ -213,6 +214,7 @@ def build_core(args):
 			except Exception as ex:
 				logging.exception(ex)
 				logging.error('Building %s failed', tags[0])
+				del output_tags[tags[0]]
 
 			client.containers.prune()
 			client.volumes.prune()
