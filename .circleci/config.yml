@@ -172,22 +172,6 @@ jobs:
 workflows:
   version: 2
 
-  update:
-    jobs:
-      - update:
-          name: update
-          window: 365
-          limit: 1
-          deploy_key: "bd:50:c1:71:98:ae:e8:f4:78:f5:c0:a7:b2:0d:6d:59"
-          context:
-            - github_docker_arduino_cli
-    triggers:
-      - schedule:
-          cron: "0 0,4,8,12,16,20 * * *"
-          filters:
-            branches:
-              only:
-                - master
 
   commit:
     jobs:
