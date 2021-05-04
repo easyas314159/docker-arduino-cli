@@ -232,9 +232,14 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 	logging.debug('buildargs: %s', buildargs)
 	logging.debug('tags: %s', tags)
 
-	image, logs = client.images.build(buildargs=buildargs, **kwargs)
-	for l in logs:
-		logging.debug(l)
+	try:
+		image, logs = client.images.build(buildargs=buildargs, **kwargs)
+		for l in logs:
+			logging.debug(l)
+	except Exception as ex:
+		logging.exception(ex)
+		logging.error('Building %s failed', tags[0])
+		return
 
 	for tag in tags:
 		if not image.tag(repo, tag=tag):
