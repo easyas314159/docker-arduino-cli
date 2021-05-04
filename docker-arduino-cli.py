@@ -32,6 +32,8 @@ def get_cli_arguments():
 	parser_build.add_argument('-u', '--username', required=True)
 	parser_build.add_argument('-p', '--password', required=True)
 
+	parser_build.add_argument('-f', '--force', default=False, action='store_true')
+
 	parser_build.add_argument('-r', '--repo', default='solarbotics/arduino-cli')
 	parser_build.add_argument('-m', '--maintainer', default='support@solarbotics.com')
 
@@ -97,7 +99,7 @@ def build_base(args):
 	base_versions = matrix['base']
 
 	# Get existing repo tags
-	existing_tags = get_repository_tags(args.repo)
+	existing_tags = set() if args.force else get_repository_tags(args.repo)
 	existing_base_tags = {b['name']: get_repository_tags(b['image']) for b in base_versions}
 
 	client = docker.from_env()
