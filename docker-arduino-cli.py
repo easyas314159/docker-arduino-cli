@@ -5,8 +5,8 @@ import json
 import logging
 import argparse
 
-from itertools import product
-from collections import OrderedDict
+from itertools import product, chain
+from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta, timezone
 
 import docker
@@ -314,10 +314,19 @@ def update(args):
 	now = datetime.now(timezone.utc)
 	after = now - timedelta(days=args.days)
 
-	arduino_cli_versions = only_max_patch(get_version_targets(args.token, 'arduino', 'arduino-cli', after))
+	arduino_cli_versions = only_max_versions(
+		get_version_targets(args.token, 'arduino', 'arduino-cli', after),
+		max_patch, limit=2
+	)
 	base_versions = {
-		'node': only_max_patch(get_version_targets(args.token, 'nodejs', 'node', after)),
-		'python': only_max_patch(get_version_targets(args.token, 'python', 'cpython', after)),
+		'node': only_max_versions(
+			get_version_targets(args.token, 'nodejs', 'node', after),
+			max_minor, limit=3
+		),
+		'python': only_max_versions(
+			get_version_targets(args.token, 'python', 'cpython', after),
+			max_patch, limit=3
+		),
 	}
 
 	message = []
@@ -453,14 +462,21 @@ def get_version_targets(token, owner, name, after, limit=100):
 
 	return available
 
-def only_max_patch(versions):
-	max_versions = {}
+def only_max_versions(versions, key, limit=1):
+	major_minor_versions = defaultdict(list)
 	for v in versions:
-		v = semver.VersionInfo.parse(v)
-		key = (v.major, v.minor)
-		max_versions[key] = max(max_versions[key], v) if key in max_versions else v
+		bin = key(semver.VersionInfo.parse(v))
+		major_minor_versions[bin].append(v)
 
-	return {str(v) for v in max_versions.values()}
+	versions = [version_list(v)[::-1][:limit] for v in major_minor_versions.values()]
+
+	return set(chain(*versions))
+
+def max_patch(v):
+	return v.to_tuple()[:2]
+
+def max_minor(v):
+	return v.to_tuple()[:1]
 
 def version_list(iter):
 	return list(sorted(iter, key=semver.VersionInfo.parse))
