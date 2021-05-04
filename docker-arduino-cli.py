@@ -314,10 +314,10 @@ def update(args):
 	now = datetime.now(timezone.utc)
 	after = now - timedelta(days=args.days)
 
-	arduino_cli_versions = get_version_targets(args.token, 'arduino', 'arduino-cli', after)
+	arduino_cli_versions = only_max_patch(get_version_targets(args.token, 'arduino', 'arduino-cli', after))
 	base_versions = {
-		'node': get_version_targets(args.token, 'nodejs', 'node', after),
-		'python': get_version_targets(args.token, 'python', 'cpython', after)
+		'node': only_max_patch(get_version_targets(args.token, 'nodejs', 'node', after)),
+		'python': only_max_patch(get_version_targets(args.token, 'python', 'cpython', after)),
 	}
 
 	message = []
@@ -452,6 +452,15 @@ def get_version_targets(token, owner, name, after, limit=100):
 		available.add(m.group(1))
 
 	return available
+
+def only_max_patch(versions):
+	max_versions = {}
+	for v in versions:
+		v = semver.VersionInfo.parse(v)
+		key = (v.major, v.minor)
+		max_versions[key] = max(max_versions[key], v) if key in max_versions else v
+
+	return {str(v) for v in max_versions.values()}
 
 def version_list(iter):
 	return list(sorted(iter, key=semver.VersionInfo.parse))
