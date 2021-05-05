@@ -179,33 +179,6 @@ workflows:
           context:
             - dockerhub
 
-      - core:
-          name: "arduino:avr"
-          package: arduino
-          platform: avr
-          requires:
-            - base
-          context:
-            - dockerhub
-
-      - core:
-          name: "esp8266:esp8266"
-          package: esp8266
-          platform: esp8266
-          requires:
-            - base
-          context:
-            - dockerhub
-
-      - core:
-          name: "esp32:esp32"
-          package: esp32
-          platform: esp32
-          requires:
-            - base
-          context:
-            - dockerhub
-
       - docs:
           context:
             - dockerhub
