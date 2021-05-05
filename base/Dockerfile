@@ -17,4 +17,3 @@ FROM $BASE_IMAGE
 ARG MAINTAINER_EMAIL
 LABEL maintainer=$MAINTAINER_EMAIL
 COPY --from=build /arduino-cli/arduino-cli /usr/local/bin
-RUN arduino-cli config init
