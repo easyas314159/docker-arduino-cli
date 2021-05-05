@@ -4,6 +4,7 @@ import sys
 import json
 import logging
 import argparse
+import subprocess
 
 from itertools import product, chain
 from collections import OrderedDict, defaultdict
@@ -149,11 +150,10 @@ def build_base(args):
 				logging.error('Building %s failed', tags[0])
 				del output_tags[tags[0]]
 
+				subprocess.run('docker system prune -af', shell=True, check=True, stdout=subprocess.DEVNULL)
+
 			client.containers.prune()
 			client.volumes.prune()
-
-		if not args.dryrun:
-			client.images.prune()
 
 	json.dump(output_tags, sys.stdout)
 
@@ -216,11 +216,10 @@ def build_core(args):
 				logging.error('Building %s failed', tags[0])
 				del output_tags[tags[0]]
 
+				subprocess.run('docker system prune -af', shell=True, check=True, stdout=subprocess.DEVNULL)
+
 			client.containers.prune()
 			client.volumes.prune()
-
-		if not args.dryrun:
-			client.images.prune()
 
 	json.dump(output_tags, sys.stdout)
 
