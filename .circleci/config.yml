@@ -169,6 +169,16 @@ jobs:
              echo "No matrix changes to commit"
            fi
 
+build-jobs: &build-jobs
+  - base:
+      context:
+        - dockerhub
+
+  - docs:
+      context:
+        - dockerhub
+
+
 workflows:
   version: 2
 
@@ -189,12 +199,17 @@ workflows:
               only:
                 - master
 
+  stragglers:
+    jobs:
+      *build-jobs
+    triggers:
+      - schedule:
+          cron: "0 12 * * *"
+          filters:
+            branches:
+              only:
+                - master
+
   commit:
     jobs:
-      - base:
-          context:
-            - dockerhub
-
-      - docs:
-          context:
-            - dockerhub
+      *build-jobs
