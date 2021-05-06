@@ -253,7 +253,6 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 	logging.debug('buildargs: %s', buildargs)
 	logging.debug('tags: %s', tags)
 
-
 	image, logs = client.images.build(buildargs=buildargs, **kwargs)
 	for l in logs:
 		logging.debug(l)
