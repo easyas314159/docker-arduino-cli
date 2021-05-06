@@ -170,11 +170,11 @@ jobs:
            fi
 
 build-jobs: &build-jobs
-  - base:
+  - docs:
       context:
         - dockerhub
 
-  - docs:
+  - base:
       context:
         - dockerhub
 
