@@ -11,5 +11,5 @@ ARG ARDUINO_CORE
 LABEL maintainer=$MAINTAINER_EMAIL
 RUN if [ -n "$ARDUINO_ADDITIONAL_URLS" ] ; then \
 		arduino-cli config init --additional-urls $ARDUINO_ADDITIONAL_URLS ; \
-	fi
+	fi && arduino-cli core update-index
 RUN arduino-cli core install $ARDUINO_CORE
