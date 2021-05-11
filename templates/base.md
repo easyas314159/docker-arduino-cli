@@ -6,6 +6,18 @@ None of the tags in this repository include any Arduino cores. To bootstrap your
 
 ## Usage
 
+### Building locally
+
+#### Starting the docker container
+
+```
+docker run --rm -it -w ~/project -v $(pwd):~/project solarbotics/arduino-cli:{{max_arduino_cli_version}}-python3 bash
+```
+
+#### Using the `arduino-cli`
+
+The `arduino-cli` has published an excellent [Getting Started](https://arduino.github.io/arduino-cli/latest/getting-started/) document with detailed examples, and provides documentation pages for all available [`arduino-cli` sub commands](https://arduino.github.io/arduino-cli/latest/commands/arduino-cli/)
+
 ### With CircleCI
 
 #### Example Project
