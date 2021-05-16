@@ -182,7 +182,7 @@ build-jobs: &build-jobs
         - dockerhub
   - base:
       name: "node"
-      base: python
+      base: node
       context:
         - dockerhub
 
