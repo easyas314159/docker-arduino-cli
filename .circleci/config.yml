@@ -177,10 +177,12 @@ jobs:
 build-jobs: &build-jobs
   - base:
       name: "python"
+      base: python
       context:
         - dockerhub
   - base:
       name: "node"
+      base: python
       context:
         - dockerhub
 
