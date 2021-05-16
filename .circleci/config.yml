@@ -51,6 +51,10 @@ jobs:
   base:
     executor: python
 
+    parameters:
+      base:
+        type: string
+
     steps:
       - init_env
       - init_build
@@ -66,6 +70,7 @@ jobs:
               -r << pipeline.parameters.repo >> \
               -m << pipeline.parameters.maintainer >> \
             base \
+              --base << parameters.base >> \
               matrix.json > tags/base.json
 
       - store_artifacts:
@@ -170,14 +175,14 @@ jobs:
            fi
 
 build-jobs: &build-jobs
-  - docs:
-      context:
-        - dockerhub
-
   - base:
+      name: "python"
       context:
         - dockerhub
-
+  - base:
+      name: "node"
+      context:
+        - dockerhub
 
 workflows:
   version: 2

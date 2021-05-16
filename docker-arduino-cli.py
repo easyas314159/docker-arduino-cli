@@ -44,6 +44,7 @@ def get_cli_arguments():
 	parser_base = subparser_build.add_parser('base')
 	parser_base.set_defaults(command=build_base)
 
+	parser_base.add_argument('--base', required=True)
 	parser_base.add_argument('matrix')
 
 	parser_core = subparser_build.add_parser('core')
@@ -96,64 +97,64 @@ def build_base(args):
 	with open(args.matrix, 'r') as f:
 		matrix = json.load(f)
 
-	arduino_cli_version_tags = version_tags(matrix['arduino-cli'])
-	base_versions = matrix['base']
+	arduino_cli = matrix['arduino-cli']
+	base = matrix['base'][args.base]
+
+	arduino_cli_version_tags = version_tags(arduino_cli['versions'])
+	base_version_tags = version_tags(base['versions'])
 
 	# Get existing repo tags
 	existing_tags = set() if args.force else get_repository_tags(args.repo)
-	existing_base_tags = {b['name']: get_repository_tags(b['image']) for b in base_versions}
+	existing_base_tags = get_repository_tags(base['image'])
 
 	client = docker.from_env()
 	client.login(username=args.username, password=args.password, reauth=True)
 
 	output_tags = {}
-	for base_version in base_versions:
-		base_version_tags = version_tags(base_version['versions'])
+	for base_version_tag, arduino_cli_version_tag in product(base_version_tags, arduino_cli_version_tags):
+		tags = [(t[0], args.base+t[1]) for t in product(
+			arduino_cli_version_tags[arduino_cli_version_tag],
+			base_version_tags[base_version_tag]
+		)]
+		tags = ['-'.join([f for f in t if f]) for t in tags]
 
-		for base_version_tag, arduino_cli_version_tag in product(base_version_tags, arduino_cli_version_tags):
-			tags = [(t[0], base_version['name']+t[1]) for t in product(
-				arduino_cli_version_tags[arduino_cli_version_tag],
-				base_version_tags[base_version_tag]
-			)]
-			tags = ['-'.join([f for f in t if f]) for t in tags]
+		if not base_version_tag in existing_base_tags:
+			logging.info(
+				'Skipping %s due to missing base %s:%s',
+				tags[0],
+				base['image'],
+				base_version_tag
+			)
+			continue
 
-			if not base_version_tag in existing_base_tags[base_version['name']]:
-				logging.info(
-					'Skipping %s due to missing base %s:%s',
-					tags[0],
-					base_version['image'],
-					base_version_tag
-				)
-				continue
+		output_tags[tags[0]] = tags
 
-			output_tags[tags[0]] = tags
+		if tags[0] in existing_tags:
+			logging.info('Skipping %s', tags[0])
+			# TODO: Double check other tags exist
+			continue
 
-			if tags[0] in existing_tags:
-				logging.info('Skipping %s', tags[0])
-				# TODO: Double check other tags exist
-				continue
+		if args.dryrun:
+			logging.info('Building %s', tags[0])
+			continue
 
-			if args.dryrun:
-				logging.info('Building %s', tags[0])
-				continue
+		buildargs = {
+			'MAINTAINER_EMAIL': args.maintainer,
+			'ARDUINO_CLI_VERSION': arduino_cli_version_tag,
+			'BASE_IMAGE': base['image'] + ':' + base_version_tag,
+		}
 
-			buildargs = {
-				'MAINTAINER_EMAIL': args.maintainer,
-				'ARDUINO_CLI_VERSION': arduino_cli_version_tag,
-				'BASE_IMAGE': base_version['image'] + ':' + base_version_tag,
-			}
+		try:
+			build_image(client, args.repo, buildargs, tags, path='base')
+		except Exception as ex:
+			logging.exception(ex)
+			logging.error('Building %s failed', tags[0])
+			del output_tags[tags[0]]
 
-			try:
-				build_image(client, args.repo, buildargs, tags, path='base')
-			except Exception as ex:
-				logging.exception(ex)
-				logging.error('Building %s failed', tags[0])
-				del output_tags[tags[0]]
+			subprocess.run('docker system prune -af', shell=True, check=True, stdout=subprocess.DEVNULL)
 
-				subprocess.run('docker system prune -af', shell=True, check=True, stdout=subprocess.DEVNULL)
-
-			client.containers.prune()
-			client.volumes.prune()
+		client.containers.prune()
+		client.volumes.prune()
 
 	json.dump(output_tags, sys.stdout)
 
@@ -356,13 +357,15 @@ def update(args):
 
 	# Update Arduino CLI
 
+	arduino_cli = matrix['arduino-cli']
+
 	## Remove stale versions
-	matrix['arduino-cli'], removed = remove_versions(matrix['arduino-cli'], arduino_cli_versions)
+	arduino_cli['versions'], removed = remove_versions(arduino_cli['versions'], arduino_cli_versions)
 	for v in removed:
 		message.append('Removed `arduino-cli@%s`' % v)
 
 	## Add new versions
-	matrix['arduino-cli'], added = add_versions(matrix['arduino-cli'], arduino_cli_versions, limit=limit)
+	arduino_cli['versions'], added = add_versions(arduino_cli['versions'], arduino_cli_versions, limit=limit)
 	for v in added:
 		message.append('Added `arduino-cli@%s`' % v)
 	limit -= len(added)
@@ -370,22 +373,22 @@ def update(args):
 	# Update base images
 
 	## Remove stale versions
-	for base in matrix['base']:
-		if not base['name'] in base_versions:
+	for name, base in matrix['base'].items():
+		if not name in base_versions:
 			continue
 
-		base['versions'], removed = remove_versions(base['versions'], base_versions[base['name']])
+		base['versions'], removed = remove_versions(base['versions'], base_versions[name])
 		for v in removed:
-			message.append('Removed base `%s@%s`' % (base['name'], v))
+			message.append('Removed base `%s@%s`' % (name, v))
 
 	## Add new versions
-	for base in matrix['base']:
-		if not base['name'] in base_versions:
+	for name, base in matrix['base'].items():
+		if not name in base_versions:
 			continue
 
-		base['versions'], added = add_versions(base['versions'], base_versions[base['name']], limit=limit)
+		base['versions'], added = add_versions(base['versions'], base_versions[name], limit=limit)
 		for v in added:
-			message.append('Added base `%s@%s`' % (base['name'], v))
+			message.append('Added base `%s@%s`' % (name, v))
 		limit -= len(added)
 
 	# Update cores
