@@ -305,7 +305,7 @@ def build_docs(args):
 			'max_base_versions': max_base_versions,
 			'max_arduino_cli_version': max_arduino_cli_version,
 			'arduino_cli_versions': mustache_map(arduino_cli_versions),
-			'base': matrix['base'],
+			'base': mustache_map(matrix['base']),
 			'core': matrix['core'],
 		}
 	)

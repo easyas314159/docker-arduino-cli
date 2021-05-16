@@ -79,13 +79,13 @@ Arduino CLI Version | Version Tags
 ### Base Images
 {{#base}}
 
-#### `{{name}}`
+#### `{{key}}`
 
-Repository: [{{image}}](https://hub.docker.com/r/{{image}})
+Repository: [{{value.image}}](https://hub.docker.com/r/{{value.image}})
 
-{{name}} Version | Version Tags
+{{key}} Version | Version Tags
 --- | ---
-{{#tags}}
+{{#value.tags}}
 {{key}} |{{#value}} `{{name}}{{.}}`{{/value}}
-{{/tags}}
+{{/value.tags}}
 {{/base}}
