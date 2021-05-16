@@ -274,12 +274,14 @@ def build_docs(args):
 	with open(args.matrix, 'r') as f:
 		matrix = json.load(f)
 
-	arduino_cli_versions = version_tags(matrix['arduino-cli'])
+	arduino_cli = matrix['arduino-cli']
+	arduino_cli_versions = version_tags(arduino_cli['versions'])
 	max_arduino_cli_version = first(arduino_cli_versions)
 
 	base_tags = OrderedDict()
 	max_base_versions = []
-	for base in matrix['base']:
+	for name, base in matrix['base'].items():
+		base['name'] = name
 		base_tags[base['name']] = version_tags(base['versions'])
 		max_base_versions.append(base['name'] + first(base_tags[base['name']]))
 
@@ -340,15 +342,9 @@ def update(args):
 		get_version_targets(args.token, 'arduino', 'arduino-cli', after),
 		max_patch, limit=2
 	)
-	base_versions = {
-		'node': only_max_versions(
-			get_version_targets(args.token, 'nodejs', 'node', after),
-			max_minor, limit=3
-		),
-		'python': only_max_versions(
-			get_version_targets(args.token, 'python', 'cpython', after),
-			max_patch, limit=3
-		),
+	base_filters = {
+		'node': lambda x: only_max_versions(x, max_minor, limit=3),
+		'python': lambda x: only_max_versions(x, max_patch, limit=3),
 	}
 
 	message = []
@@ -372,21 +368,23 @@ def update(args):
 
 	# Update base images
 
-	## Remove stale versions
 	for name, base in matrix['base'].items():
-		if not name in base_versions:
-			continue
+		repo = base['repo']
+		existing_tags = get_repository_tags(base['image'])
 
-		base['versions'], removed = remove_versions(base['versions'], base_versions[name])
+		versions = get_version_targets(args.token, repo['owner'], repo['name'], after)
+		versions = set.intersection(versions, existing_tags)
+
+		if name in base_filters:
+			versions = base_filters[name](versions)
+
+		## Remove stale versions
+		base['versions'], removed = remove_versions(base['versions'], versions)
 		for v in removed:
 			message.append('Removed base `%s@%s`' % (name, v))
 
-	## Add new versions
-	for name, base in matrix['base'].items():
-		if not name in base_versions:
-			continue
-
-		base['versions'], added = add_versions(base['versions'], base_versions[name], limit=limit)
+		## Add new versions
+		base['versions'], added = add_versions(base['versions'], versions, limit=limit)
 		for v in added:
 			message.append('Added base `%s@%s`' % (name, v))
 		limit -= len(added)
