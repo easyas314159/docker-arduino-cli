@@ -177,7 +177,7 @@ def build_core(args):
 	repo_core = args.repo + '-' + args.package
 	if args.package != args.platform:
 		repo_core += '-' + args.platform
-	existing_tags = get_repository_tags(repo_core)
+	existing_tags = set() if args.force else get_repository_tags(repo_core)
 
 	client = docker.from_env()
 	client.login(username=args.username, password=args.password, reauth=True)
