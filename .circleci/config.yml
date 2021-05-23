@@ -175,10 +175,12 @@ jobs:
            fi
 
 build-jobs: &build-jobs
+  # Documentation
   - docs:
       context:
         - dockerhub
 
+  # Base container
   - base:
       name: "python"
       base: python
