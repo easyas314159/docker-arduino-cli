@@ -192,6 +192,16 @@ build-jobs: &build-jobs
       context:
         - dockerhub
 
+  # Core esp8266:esp8266
+  - core:
+      name: "node-esp8266"
+      package: esp8266
+      platform: esp8266
+      requires:
+        - node
+      context:
+        - dockerhub
+
 workflows:
   version: 2
 
