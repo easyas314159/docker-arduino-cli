@@ -136,7 +136,11 @@ def build_base(args):
 
 		if tags[0] in existing_tags:
 			logging.info('Skipping %s', tags[0])
-			# TODO: Double check other tags exist
+			try:
+				ensure_tags(client, args.repo, tags, existing_tags)
+			except Exception as ex:
+				logging.exception(ex)
+				logging.error('Tagging %s failed', tags[0])
 			continue
 
 		if args.dryrun:
@@ -199,7 +203,11 @@ def build_core(args):
 
 			if tags[0] in existing_tags:
 				logging.info('Skipping %s', tags[0])
-				# TODO: Double check other tags exist
+				try:
+					ensure_tags(client, repo_core, tags, existing_tags)
+				except Exception as ex:
+					logging.exception(ex)
+					logging.error('Tagging %s failed', tags[0])
 				continue
 
 			if args.dryrun:
@@ -280,6 +288,30 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 
 	image.reload()
 	logging.debug(image.tags)
+
+def ensure_tags(client, repo, tags, existing):
+	missing = {t for t in tags[1:] if not t in existing}
+
+	if not missing:
+		return
+
+	logging.info('Pulling %s:%s', repo, tags[0])
+	image = client.images.pull(repo, tag=tags[0])
+
+	for tag in missing:
+		if not image.tag(repo, tag=tag):
+			logging.warn('Failed to tag %s with %s', image.short_id, tag)
+			continue
+
+		while True:
+			logging.info('Pushing %s:%s', repo, tag)
+			try:
+				output = client.images.push(repo, tag=tag, stream=False)
+				logging.debug(output)
+				break
+			except Exception as ex:
+				logging.exception(ex)
+				time.sleep(10.0)
 
 def build_docs(args):
 	with open(args.matrix, 'r') as f:
