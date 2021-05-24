@@ -89,10 +89,14 @@ def main():
 	args.command(args)
 
 def get_repository_tags(repo):
-	try:
-		return {t['name'] for t in requests.get('https://registry.hub.docker.com/v1/repositories/%s/tags' % repo).json()}
-	except:
+	rsp = requests.get('https://registry.hub.docker.com/v1/repositories/%s/tags' % repo)
+	if rsp.ok:
+		return {t['name'] for t in rsp.json()}
+
+	if rsp.status_code == 404:
 		return set()
+
+	rsp.raise_for_status()
 
 def build_base(args):
 	with open(args.matrix, 'r') as f:
