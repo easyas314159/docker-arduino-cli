@@ -263,9 +263,15 @@ def build_image(client, repo, buildargs, tags, **kwargs):
 			logging.warn('Failed to tag %s with %s', image.short_id, tag)
 			continue
 
-		logging.info('Pushing %s:%s', repo, tag)
-		output = client.images.push(repo, tag=tag, stream=False)
-		logging.debug(output)
+		while True:
+			logging.info('Pushing %s:%s', repo, tag)
+			try:
+				output = client.images.push(repo, tag=tag, stream=False)
+				logging.debug(output)
+				break
+			except Exception as ex:
+				logging.exception(ex)
+				time.sleep(10.0)
 
 	image.reload()
 	logging.debug(image.tags)
