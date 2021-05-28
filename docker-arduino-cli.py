@@ -35,6 +35,7 @@ def get_cli_arguments():
 	parser_build.add_argument('-p', '--password', required=True)
 
 	parser_build.add_argument('-f', '--force', default=False, action='store_true')
+	parser_build.add_argument('-q', '--quick', default=False, action='store_true')
 
 	parser_build.add_argument('-r', '--repo', default='solarbotics/arduino-cli')
 	parser_build.add_argument('-m', '--maintainer', default='support@solarbotics.com')
@@ -132,6 +133,9 @@ def build_base(args):
 			)
 			continue
 
+		if args.quick:
+			tags = tags[:1]
+
 		output_tags[tags[0]] = tags
 
 		if tags[0] in existing_tags:
@@ -198,6 +202,9 @@ def build_core(args):
 				platform_version_tags[platform_version_tag],
 				base_version_tags[base_version_tag]
 			)
+
+			if args.quick:
+				tags = tags[:1]
 
 			output_tags[tags[0]] = tags
 
