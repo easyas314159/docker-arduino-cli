@@ -208,9 +208,9 @@ build-jobs: &build-jobs
       package: esp32
       platform: esp32
       requires:
-    	  - node
+        - node
       context:
-    	  - dockerhub
+        - dockerhub
 
 workflows:
   version: 2
