@@ -89,15 +89,20 @@ def main():
 
 	args.command(args)
 
-def get_repository_tags(repo):
-	rsp = requests.get('https://registry.hub.docker.com/v1/repositories/%s/tags' % repo)
-	if rsp.ok:
-		return {t['name'] for t in rsp.json()}
+def get_repository_tags(repo, retry_delay=1.0):
+	while True:
+		rsp = requests.get('https://registry.hub.docker.com/v1/repositories/%s/tags' % repo)
+		if rsp.ok:
+			return {t['name'] for t in rsp.json()}
 
-	if rsp.status_code == 404:
-		return set()
+		if rsp.status_code == 404:
+			return set()
 
-	rsp.raise_for_status()
+		if rsp.status_code == 502:
+			time.sleep(retry_delay)
+			continue
+
+		rsp.raise_for_status()
 
 def build_base(args):
 	with open(args.matrix, 'r') as f:
