@@ -388,10 +388,7 @@ def update(args):
 	now = datetime.now(timezone.utc)
 	after = now - timedelta(days=args.days)
 
-	arduino_cli_versions = only_max_versions(
-		get_version_targets(args.token, 'arduino', 'arduino-cli', after),
-		max_patch, limit=2
-	)
+	arduino_cli_versions = get_version_targets(args.token, 'arduino', 'arduino-cli', after)
 	base_filters = {
 		'node': lambda x: only_max_versions(x, max_minor, limit=3),
 		'python': lambda x: only_max_versions(x, max_patch, limit=3),
