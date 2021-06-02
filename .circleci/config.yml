@@ -204,6 +204,14 @@ build-jobs: &build-jobs
 
   # Core esp32:esp32
   - core:
+      name: "python-esp32"
+      package: esp32
+      platform: esp32
+      requires:
+        - python
+      context:
+        - dockerhub
+  - core:
       name: "node-esp32"
       package: esp32
       platform: esp32
