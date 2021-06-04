@@ -415,6 +415,7 @@ def update(args):
 	for v in added:
 		message.append('Added `arduino-cli@%s`' % v)
 
+	should_update_core = False
 	should_update_base = len(added) == 0
 
 	# Update base images
@@ -439,6 +440,7 @@ def update(args):
 			base['versions'], added = add_versions(base['versions'], versions, limit=args.limit)
 			for v in added:
 				message.append('Added base `%s@%s`' % (name, v))
+			should_update_core = should_update_core and len(added) == 0
 
 	# Update cores
 
@@ -464,9 +466,10 @@ def update(args):
 			message.append('Removed core `%s:%s@%s`' % (core['package'], core['arch'], v))
 
 		## Add new versions
-		core['versions'], added = add_versions(core['versions'], core_versions, limit=None)
-		for v in added:
-			message.append('Added core `%s:%s@%s`' % (core['package'], core['arch'], v))
+		if should_update_core:
+			core['versions'], added = add_versions(core['versions'], core_versions, limit=None)
+			for v in added:
+				message.append('Added core `%s:%s@%s`' % (core['package'], core['arch'], v))
 
 	if not message:
 		return
