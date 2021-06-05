@@ -415,7 +415,7 @@ def update(args):
 	for v in added:
 		message.append('Added `arduino-cli@%s`' % v)
 
-	should_update_core = False
+	should_update_core = True
 	should_update_base = len(added) == 0
 
 	# Update base images
