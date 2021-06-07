@@ -201,6 +201,14 @@ build-jobs: &build-jobs
         - python
       context:
         - dockerhub
+  - core:
+      name: "node-arduino:avr"
+      package: arduino
+      platform: avr
+      requires:
+        - node
+      context:
+        - dockerhub
 
   # Core esp8266:esp8266
   - core:
