@@ -423,6 +423,10 @@ def update(args):
 
 	for name, base in matrix['base'].items():
 		repo = base['repo']
+		if repo is None:
+			logging.warn('No repo configured for base "%s"', name)
+			continue
+
 		existing_tags = get_repository_tags(base['image'])
 
 		versions = get_version_targets(args.token, repo['owner'], repo['name'], after)
