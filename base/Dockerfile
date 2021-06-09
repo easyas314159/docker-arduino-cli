@@ -1,8 +1,9 @@
+ARG BUILD_IMAGE
 ARG ARDUINO_CLI_VERSION
 ARG BASE_IMAGE
 ARG MAINTAINER_EMAIL
 
-FROM circleci/golang:1.14.7 AS build
+FROM $BUILD_IMAGE AS build
 
 USER root
 RUN env GO111MODULE=on go get -u github.com/go-task/task/v3/cmd/task@latest

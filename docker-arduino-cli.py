@@ -158,6 +158,7 @@ def build_base(args):
 
 		buildargs = {
 			'MAINTAINER_EMAIL': args.maintainer,
+			'BUILD_IMAGE': base['build'],
 			'ARDUINO_CLI_VERSION': arduino_cli_version_tag,
 			'BASE_IMAGE': base['image'] + ':' + base_version_tag,
 		}
