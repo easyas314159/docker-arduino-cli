@@ -93,7 +93,11 @@ def get_repository_tags(repo, retry_delay=1.0):
 	while True:
 		rsp = requests.get('https://registry.hub.docker.com/v1/repositories/%s/tags' % repo)
 		if rsp.ok:
-			return {t['name'] for t in rsp.json()}
+			try:
+				return {t['name'] for t in rsp.json()}
+			except json.JSONDecodeError:
+				time.sleep(retry_delay)
+				continue
 
 		if rsp.status_code == 404:
 			return set()
