@@ -177,7 +177,7 @@ jobs:
 build-jobs: &build-jobs
   # Documentation
   - docs:
-      require:
+      requires:
         - python
         - python-arduino:avr
         - python-esp8266
