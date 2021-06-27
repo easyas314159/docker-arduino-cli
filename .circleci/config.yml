@@ -177,6 +177,15 @@ jobs:
 build-jobs: &build-jobs
   # Documentation
   - docs:
+      require:
+        - python
+        - python-arduino:avr
+        - python-esp8266
+        - python-esp32
+        - node
+        - node-arduino:avr
+        - node-esp8266
+        - node-esp32
       context:
         - dockerhub
 
