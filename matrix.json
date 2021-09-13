@@ -21,8 +21,8 @@
   },
   "base": {
     "python": {
-      "build": "circleci/golang:1.16",
-      "image": "circleci/python",
+      "build": "cimg/go:1.16",
+      "image": "cimg/python",
       "repo": {
         "owner": "python",
         "name": "cpython"
@@ -41,8 +41,8 @@
       ]
     },
     "node": {
-      "build": "circleci/golang:1.16",
-      "image": "circleci/node",
+      "build": "cimg/go:1.16",
+      "image": "cimg/node",
       "repo": {
         "owner": "nodejs",
         "name": "node"
