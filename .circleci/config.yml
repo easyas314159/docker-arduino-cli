@@ -280,7 +280,7 @@ workflows:
       *build-jobs
     triggers:
       - schedule:
-          cron: "0 12 * * *"
+          cron: "0 8,16 * * *"
           filters:
             branches:
               only:
