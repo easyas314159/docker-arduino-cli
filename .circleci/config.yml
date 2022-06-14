@@ -12,7 +12,7 @@ parameters:
 executors:
   python:
     docker:
-      - image: circleci/python:3.9
+      - image: cimg/python:3.9
         auth:
           username: $DOCKER_HUB_USERNAME
           password: $DOCKER_HUB_PASSWORD
