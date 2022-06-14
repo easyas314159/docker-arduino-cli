@@ -7,6 +7,7 @@ import logging
 import argparse
 import subprocess
 
+from contextlib import ExitStack
 from itertools import product, chain
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta, timezone
@@ -334,6 +335,11 @@ def build_docs(args):
 	with open(args.matrix, 'r') as f:
 		matrix = json.load(f)
 
+	token = requests.post('https://hub.docker.com/v2/users/login', data={
+		'username': args.username,
+		'password': args.password,
+	}).json()['token']
+
 	arduino_cli = matrix['arduino-cli']
 	arduino_cli_versions = version_tags(arduino_cli['versions'])
 	max_arduino_cli_version = first(arduino_cli_versions)
@@ -357,7 +363,7 @@ def build_docs(args):
 
 		core['tags'] = mustache_map(core['tags'])
 
-	render_template(
+	content = render_template(
 		'templates/base.md',
 		os.path.join(args.output, 'base.md'),
 		{
@@ -369,11 +375,12 @@ def build_docs(args):
 			'core': matrix['core'],
 		}
 	)
+	patch_documentation(args.repo, content, token=token)
 
 	for core in matrix['core']:
 		filename = '%s-%s.md' % (core['package'], core['arch'])
 
-		render_template(
+		content = render_template(
 			'templates/core.md',
 			os.path.join(args.output, filename),
 			{
@@ -384,12 +391,42 @@ def build_docs(args):
 			}
 		)
 
+		patch_documentation(core['repo'], content, token=token)
+
 def mustache_map(m):
 	return [{'key': k, 'value': v} for k,v in m.items()]
 
 def render_template(src, dst, data):
-	with open(src, 'r') as f_in, open(dst, 'w') as f_out:
-		f_out.write(chevron.render(f_in, data))
+	with ExitStack() as stack:
+		f_in = stack.enter_context(open(src, 'r'))
+		f_out = stack.enter_context(open(dst, 'w'))
+
+		content = chevron.render(f_in, data)
+		f_out.write(content)
+
+	return content
+
+def patch_documentation(repo, content, token=None):
+	if token is None:
+		return
+
+	kwargs = {
+		'headers': {
+			'Authorization': f'Bearer {token}',
+		},
+		'data': {
+			'full_description': content,
+		},
+	}
+
+	logging.info(f'Updating repository description [{repo}]')
+
+	try:
+		rsp = requests.patch(f'https://hub.docker.com/v2/repositories/{repo}/', **kwargs)
+		rsp.raise_for_status()
+	except Exception as ex:
+		logging.exception(ex)
+		logging.info(rsp.text)
 
 def update(args):
 	with open(args.matrix, 'r') as f:
