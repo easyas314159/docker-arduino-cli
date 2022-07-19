@@ -414,7 +414,7 @@ def patch_documentation(repo, content, token=None):
 		'headers': {
 			'Authorization': f'Bearer {token}',
 		},
-		'data': {
+		'json': {
 			'full_description': content,
 		},
 	}
